@@ -1,0 +1,20 @@
+{
+  "id": "alibaba",
+  "name": "Alibaba Cloud",
+  "regions": [
+    { "id": "us-west-1", "name": "US (Silicon Valley)" },
+    { "id": "cn-hangzhou", "name": "China (Hangzhou)" },
+    { "id": "cn-shanghai", "name": "China (Shanghai)" },
+    { "id": "ap-southeast-1", "name": "Singapore" },
+    { "id": "ap-northeast-1", "name": "Japan (Tokyo)" },
+    { "id": "eu-central-1", "name": "Germany (Frankfurt)" }
+  ],
+  "instance_types": [
+    { "id": "ecs.g6.2xlarge", "name": "ecs.g6.2xlarge", "cores": 8, "memory_gb": 32, "prices": { "us-west-1": 0.42, "ap-southeast-1": 0.38, "ap-northeast-1": 0.40, "eu-central-1": 0.44 } },
+    { "id": "ecs.g6.4xlarge", "name": "ecs.g6.4xlarge", "cores": 16, "memory_gb": 64, "prices": { "us-west-1": 0.84, "ap-southeast-1": 0.76, "ap-northeast-1": 0.80, "eu-central-1": 0.88 } },
+    { "id": "ecs.g6.8xlarge", "name": "ecs.g6.8xlarge", "cores": 32, "memory_gb": 128, "prices": { "us-west-1": 1.68, "ap-southeast-1": 1.52, "ap-northeast-1": 1.60, "eu-central-1": 1.76 } },
+    { "id": "ecs.r6.2xlarge", "name": "ecs.r6.2xlarge", "cores": 8, "memory_gb": 64, "prices": { "us-west-1": 0.52, "ap-southeast-1": 0.48, "ap-northeast-1": 0.50, "eu-central-1": 0.54 } },
+    { "id": "ecs.r6.4xlarge", "name": "ecs.r6.4xlarge", "cores": 16, "memory_gb": 128, "prices": { "us-west-1": 1.04, "ap-southeast-1": 0.96, "ap-northeast-1": 1.00, "eu-central-1": 1.08 } },
+    { "id": "ecs.c6.4xlarge", "name": "ecs.c6.4xlarge", "cores": 16, "memory_gb": 32, "prices": { "us-west-1": 0.58, "ap-southeast-1": 0.52, "ap-northeast-1": 0.55, "eu-central-1": 0.60 } }
+  ]
+}

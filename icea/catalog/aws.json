@@ -1,0 +1,23 @@
+{
+  "id": "aws",
+  "name": "AWS",
+  "regions": [
+    { "id": "us-east-1", "name": "US East (N. Virginia)" },
+    { "id": "us-east-2", "name": "US East (Ohio)" },
+    { "id": "us-west-2", "name": "US West (Oregon)" },
+    { "id": "eu-west-1", "name": "EU (Ireland)" },
+    { "id": "eu-central-1", "name": "EU (Frankfurt)" },
+    { "id": "ap-southeast-1", "name": "Asia Pacific (Singapore)" },
+    { "id": "ap-northeast-1", "name": "Asia Pacific (Tokyo)" }
+  ],
+  "instance_types": [
+    { "id": "m6i.2xlarge", "name": "m6i.2xlarge", "cores": 8, "memory_gb": 32, "prices": { "us-east-1": 0.384, "us-west-2": 0.384, "eu-west-1": 0.422, "eu-central-1": 0.418, "ap-southeast-1": 0.422, "ap-northeast-1": 0.424 } },
+    { "id": "m6i.4xlarge", "name": "m6i.4xlarge", "cores": 16, "memory_gb": 64, "prices": { "us-east-1": 0.768, "us-west-2": 0.768, "eu-west-1": 0.845, "eu-central-1": 0.836, "ap-southeast-1": 0.845, "ap-northeast-1": 0.848 } },
+    { "id": "m6i.8xlarge", "name": "m6i.8xlarge", "cores": 32, "memory_gb": 128, "prices": { "us-east-1": 1.536, "us-west-2": 1.536, "eu-west-1": 1.69, "eu-central-1": 1.672, "ap-southeast-1": 1.69, "ap-northeast-1": 1.696 } },
+    { "id": "r6g.2xlarge", "name": "r6g.2xlarge", "cores": 8, "memory_gb": 64, "prices": { "us-east-1": 0.4032, "us-west-2": 0.4032, "eu-west-1": 0.4435, "eu-central-1": 0.439, "ap-southeast-1": 0.4435, "ap-northeast-1": 0.4458 } },
+    { "id": "r6g.4xlarge", "name": "r6g.4xlarge", "cores": 16, "memory_gb": 128, "prices": { "us-east-1": 0.8064, "us-west-2": 0.8064, "eu-west-1": 0.887, "eu-central-1": 0.878, "ap-southeast-1": 0.887, "ap-northeast-1": 0.8916 } },
+    { "id": "r6g.8xlarge", "name": "r6g.8xlarge", "cores": 32, "memory_gb": 256, "prices": { "us-east-1": 1.6128, "us-west-2": 1.6128, "eu-west-1": 1.774, "eu-central-1": 1.756, "ap-southeast-1": 1.774, "ap-northeast-1": 1.7832 } },
+    { "id": "r5.4xlarge", "name": "r5.4xlarge", "cores": 16, "memory_gb": 128, "prices": { "us-east-1": 1.008, "us-west-2": 1.008, "eu-west-1": 1.109, "eu-central-1": 1.097, "ap-southeast-1": 1.109, "ap-northeast-1": 1.114 } },
+    { "id": "c6i.4xlarge", "name": "c6i.4xlarge", "cores": 16, "memory_gb": 32, "prices": { "us-east-1": 0.68, "us-west-2": 0.68, "eu-west-1": 0.748, "eu-central-1": 0.74, "ap-southeast-1": 0.748, "ap-northeast-1": 0.752 } }
+  ]
+}

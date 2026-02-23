@@ -1,0 +1,21 @@
+{
+  "id": "digitalocean",
+  "name": "DigitalOcean",
+  "regions": [
+    { "id": "nyc1", "name": "New York 1" },
+    { "id": "sfo3", "name": "San Francisco 3" },
+    { "id": "ams3", "name": "Amsterdam 3" },
+    { "id": "sgp1", "name": "Singapore 1" },
+    { "id": "blr1", "name": "Bangalore 1" }
+  ],
+  "instance_types": [
+    { "id": "s-2vcpu-4gb", "name": "Basic 2 vCPU, 4 GB", "cores": 2, "memory_gb": 4, "hourly_usd": 0.024 },
+    { "id": "s-4vcpu-8gb", "name": "Basic 4 vCPU, 8 GB", "cores": 4, "memory_gb": 8, "hourly_usd": 0.048 },
+    { "id": "s-8vcpu-16gb", "name": "Basic 8 vCPU, 16 GB", "cores": 8, "memory_gb": 16, "hourly_usd": 0.096 },
+    { "id": "s-16vcpu-32gb", "name": "Basic 16 vCPU, 32 GB", "cores": 16, "memory_gb": 32, "hourly_usd": 0.192 },
+    { "id": "c-4", "name": "CPU-Optimized 4 vCPU, 8 GB", "cores": 4, "memory_gb": 8, "hourly_usd": 0.071 },
+    { "id": "c-8", "name": "CPU-Optimized 8 vCPU, 16 GB", "cores": 8, "memory_gb": 16, "hourly_usd": 0.142 },
+    { "id": "c-16", "name": "CPU-Optimized 16 vCPU, 32 GB", "cores": 16, "memory_gb": 32, "hourly_usd": 0.284 },
+    { "id": "m-8vcpu-64gb", "name": "Memory 8 vCPU, 64 GB", "cores": 8, "memory_gb": 64, "hourly_usd": 0.476 }
+  ]
+}

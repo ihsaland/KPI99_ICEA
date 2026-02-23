@@ -1,0 +1,16 @@
+{
+  "id": "synapse",
+  "name": "Azure Synapse (Managed Spark)",
+  "regions": [
+    { "id": "eastus", "name": "East US" },
+    { "id": "westus2", "name": "West US 2" },
+    { "id": "westeurope", "name": "West Europe" },
+    { "id": "southeastasia", "name": "Southeast Asia" }
+  ],
+  "instance_types": [
+    { "id": "Small", "name": "Small (4 vCores)", "cores": 4, "memory_gb": 32, "prices": { "eastus": 0.38, "westus2": 0.38, "westeurope": 0.42, "southeastasia": 0.45 } },
+    { "id": "Medium", "name": "Medium (8 vCores)", "cores": 8, "memory_gb": 64, "prices": { "eastus": 0.76, "westus2": 0.76, "westeurope": 0.84, "southeastasia": 0.90 } },
+    { "id": "Large", "name": "Large (16 vCores)", "cores": 16, "memory_gb": 128, "prices": { "eastus": 1.52, "westus2": 1.52, "westeurope": 1.68, "southeastasia": 1.80 } },
+    { "id": "X-Large", "name": "X-Large (32 vCores)", "cores": 32, "memory_gb": 256, "prices": { "eastus": 3.04, "westus2": 3.04, "westeurope": 3.36, "southeastasia": 3.60 } }
+  ]
+}

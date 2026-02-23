@@ -1,0 +1,1 @@
+{"id":"on-prem","name":"On-premises","regions":[],"instance_types":[{"id":"custom","name":"Custom (enter specs below)","cores":16,"memory_gb":64,"hourly_usd":0}]}

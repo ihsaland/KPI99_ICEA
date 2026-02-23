@@ -1,0 +1,17 @@
+{
+  "id": "dataproc",
+  "name": "Google Dataproc (Managed Spark)",
+  "regions": [
+    { "id": "us-central1", "name": "us-central1 (Iowa)" },
+    { "id": "us-east1", "name": "us-east1 (S. Carolina)" },
+    { "id": "europe-west1", "name": "europe-west1 (Belgium)" },
+    { "id": "asia-southeast1", "name": "asia-southeast1 (Singapore)" }
+  ],
+  "instance_types": [
+    { "id": "n2-standard-4", "name": "n2-standard-4", "cores": 4, "memory_gb": 16, "prices": { "us-central1": 0.194, "us-east1": 0.194, "europe-west1": 0.214, "asia-southeast1": 0.233 } },
+    { "id": "n2-standard-8", "name": "n2-standard-8", "cores": 8, "memory_gb": 32, "prices": { "us-central1": 0.388, "us-east1": 0.388, "europe-west1": 0.427, "asia-southeast1": 0.466 } },
+    { "id": "n2-standard-16", "name": "n2-standard-16", "cores": 16, "memory_gb": 64, "prices": { "us-central1": 0.777, "us-east1": 0.777, "europe-west1": 0.855, "asia-southeast1": 0.932 } },
+    { "id": "n2-highmem-8", "name": "n2-highmem-8", "cores": 8, "memory_gb": 64, "prices": { "us-central1": 0.524, "us-east1": 0.524, "europe-west1": 0.576, "asia-southeast1": 0.629 } },
+    { "id": "n2-highmem-16", "name": "n2-highmem-16", "cores": 16, "memory_gb": 128, "prices": { "us-central1": 1.048, "us-east1": 1.048, "europe-west1": 1.153, "asia-southeast1": 1.258 } }
+  ]
+}

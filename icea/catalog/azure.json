@@ -1,0 +1,23 @@
+{
+  "id": "azure",
+  "name": "Azure",
+  "regions": [
+    { "id": "eastus", "name": "East US" },
+    { "id": "eastus2", "name": "East US 2" },
+    { "id": "westus2", "name": "West US 2" },
+    { "id": "westeurope", "name": "West Europe" },
+    { "id": "northeurope", "name": "North Europe" },
+    { "id": "southeastasia", "name": "Southeast Asia" },
+    { "id": "japaneast", "name": "Japan East" }
+  ],
+  "instance_types": [
+    { "id": "Standard_D8s_v3", "name": "Standard D8s v3", "cores": 8, "memory_gb": 32, "prices": { "eastus": 0.384, "westus2": 0.384, "westeurope": 0.422, "northeurope": 0.418, "southeastasia": 0.446, "japaneast": 0.473 } },
+    { "id": "Standard_D16s_v3", "name": "Standard D16s v3", "cores": 16, "memory_gb": 64, "prices": { "eastus": 0.768, "westus2": 0.768, "westeurope": 0.845, "northeurope": 0.836, "southeastasia": 0.892, "japaneast": 0.946 } },
+    { "id": "Standard_D32s_v3", "name": "Standard D32s v3", "cores": 32, "memory_gb": 128, "prices": { "eastus": 1.536, "westus2": 1.536, "westeurope": 1.69, "northeurope": 1.672, "southeastasia": 1.784, "japaneast": 1.892 } },
+    { "id": "Standard_E8s_v3", "name": "Standard E8s v3", "cores": 8, "memory_gb": 64, "prices": { "eastus": 0.504, "westus2": 0.504, "westeurope": 0.554, "northeurope": 0.548, "southeastasia": 0.584, "japaneast": 0.62 } },
+    { "id": "Standard_E16s_v3", "name": "Standard E16s v3", "cores": 16, "memory_gb": 128, "prices": { "eastus": 1.008, "westus2": 1.008, "westeurope": 1.109, "northeurope": 1.096, "southeastasia": 1.168, "japaneast": 1.24 } },
+    { "id": "Standard_E32s_v3", "name": "Standard E32s v3", "cores": 32, "memory_gb": 256, "prices": { "eastus": 2.016, "westus2": 2.016, "westeurope": 2.218, "northeurope": 2.192, "southeastasia": 2.336, "japaneast": 2.48 } },
+    { "id": "Standard_D8as_v4", "name": "Standard D8as v4", "cores": 8, "memory_gb": 32, "prices": { "eastus": 0.376, "westus2": 0.376, "westeurope": 0.414, "northeurope": 0.409, "southeastasia": 0.437, "japaneast": 0.464 } },
+    { "id": "Standard_D16as_v4", "name": "Standard D16as v4", "cores": 16, "memory_gb": 64, "prices": { "eastus": 0.752, "westus2": 0.752, "westeurope": 0.828, "northeurope": 0.818, "southeastasia": 0.874, "japaneast": 0.928 } }
+  ]
+}

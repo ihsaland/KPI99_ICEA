@@ -1,0 +1,78 @@
+# Example Kubernetes deployment for ICEA. Adjust namespace, image, and resources.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: icea
+  labels:
+    app: icea
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: icea
+  template:
+    metadata:
+      labels:
+        app: icea
+    spec:
+      containers:
+        - name: icea
+          image: icea:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: ICEA_DB_PATH
+              value: "/data/icea.db"
+            - name: ICEA_ENV
+              value: "production"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /v1/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: icea-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: icea
+spec:
+  selector:
+    app: icea
+  ports:
+    - port: 80
+      targetPort: 8000
+---
+# Optional: PVC for SQLite (single-replica only; for multi-replica use shared storage or external DB)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: icea-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

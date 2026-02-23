@@ -1,0 +1,20 @@
+{
+  "id": "linode",
+  "name": "Linode (Akamai)",
+  "regions": [
+    { "id": "us-east", "name": "Newark" },
+    { "id": "us-central", "name": "Dallas" },
+    { "id": "us-west", "name": "Fremont" },
+    { "id": "eu-west", "name": "London" },
+    { "id": "ap-south", "name": "Mumbai" },
+    { "id": "ap-northeast", "name": "Tokyo" }
+  ],
+  "instance_types": [
+    { "id": "g6-dedicated-4", "name": "Dedicated 4 GB", "cores": 2, "memory_gb": 4, "hourly_usd": 0.036 },
+    { "id": "g6-dedicated-8", "name": "Dedicated 8 GB", "cores": 4, "memory_gb": 8, "hourly_usd": 0.072 },
+    { "id": "g6-dedicated-16", "name": "Dedicated 16 GB", "cores": 8, "memory_gb": 16, "hourly_usd": 0.144 },
+    { "id": "g6-dedicated-32", "name": "Dedicated 32 GB", "cores": 16, "memory_gb": 32, "hourly_usd": 0.288 },
+    { "id": "g6-dedicated-64", "name": "Dedicated 64 GB", "cores": 32, "memory_gb": 64, "hourly_usd": 0.576 },
+    { "id": "g6-dedicated-128", "name": "Dedicated 128 GB", "cores": 64, "memory_gb": 128, "hourly_usd": 1.152 }
+  ]
+}

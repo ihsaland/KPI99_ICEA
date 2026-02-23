@@ -1,0 +1,23 @@
+{
+  "id": "gcp",
+  "name": "Google Cloud",
+  "regions": [
+    { "id": "us-central1", "name": "us-central1 (Iowa)" },
+    { "id": "us-east1", "name": "us-east1 (S. Carolina)" },
+    { "id": "us-west1", "name": "us-west1 (Oregon)" },
+    { "id": "europe-west1", "name": "europe-west1 (Belgium)" },
+    { "id": "europe-west4", "name": "europe-west4 (Netherlands)" },
+    { "id": "asia-southeast1", "name": "asia-southeast1 (Singapore)" },
+    { "id": "asia-northeast1", "name": "asia-northeast1 (Tokyo)" }
+  ],
+  "instance_types": [
+    { "id": "n2-standard-8", "name": "n2-standard-8", "cores": 8, "memory_gb": 32, "prices": { "us-central1": 0.3884, "us-east1": 0.3884, "us-west1": 0.4272, "europe-west1": 0.4272, "europe-west4": 0.4272, "asia-southeast1": 0.4660, "asia-northeast1": 0.4660 } },
+    { "id": "n2-standard-16", "name": "n2-standard-16", "cores": 16, "memory_gb": 64, "prices": { "us-central1": 0.7769, "us-east1": 0.7769, "us-west1": 0.8545, "europe-west1": 0.8545, "europe-west4": 0.8545, "asia-southeast1": 0.9321, "asia-northeast1": 0.9321 } },
+    { "id": "n2-standard-32", "name": "n2-standard-32", "cores": 32, "memory_gb": 128, "prices": { "us-central1": 1.5538, "us-east1": 1.5538, "us-west1": 1.7090, "europe-west1": 1.7090, "europe-west4": 1.7090, "asia-southeast1": 1.8642, "asia-northeast1": 1.8642 } },
+    { "id": "n2-highmem-8", "name": "n2-highmem-8", "cores": 8, "memory_gb": 64, "prices": { "us-central1": 0.5240, "us-east1": 0.5240, "us-west1": 0.5764, "europe-west1": 0.5764, "europe-west4": 0.5764, "asia-southeast1": 0.6288, "asia-northeast1": 0.6288 } },
+    { "id": "n2-highmem-16", "name": "n2-highmem-16", "cores": 16, "memory_gb": 128, "prices": { "us-central1": 1.0481, "us-east1": 1.0481, "us-west1": 1.1529, "europe-west1": 1.1529, "europe-west4": 1.1529, "asia-southeast1": 1.2577, "asia-northeast1": 1.2577 } },
+    { "id": "n2-highmem-32", "name": "n2-highmem-32", "cores": 32, "memory_gb": 256, "prices": { "us-central1": 2.0962, "us-east1": 2.0962, "us-west1": 2.3058, "europe-west1": 2.3058, "europe-west4": 2.3058, "asia-southeast1": 2.5154, "asia-northeast1": 2.5154 } },
+    { "id": "n2-highcpu-16", "name": "n2-highcpu-16", "cores": 16, "memory_gb": 16, "prices": { "us-central1": 0.5824, "us-east1": 0.5824, "us-west1": 0.6406, "europe-west1": 0.6406, "europe-west4": 0.6406, "asia-southeast1": 0.6989, "asia-northeast1": 0.6989 } },
+    { "id": "n2-highcpu-32", "name": "n2-highcpu-32", "cores": 32, "memory_gb": 32, "prices": { "us-central1": 1.1648, "us-east1": 1.1648, "us-west1": 1.2813, "europe-west1": 1.2813, "europe-west4": 1.2813, "asia-southeast1": 1.3978, "asia-northeast1": 1.3978 } }
+  ]
+}

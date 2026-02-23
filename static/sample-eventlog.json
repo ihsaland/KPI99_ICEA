@@ -1,0 +1,7 @@
+{"Event":"SparkListenerJobStart","Job ID":0,"Submission Time":1000000,"Stage Infos":[{"Stage ID":0,"Stage Attempt ID":0,"Number of Tasks":2}]}
+{"Event":"SparkListenerTaskEnd","Stage ID":0,"Task Info":{},"Task Metrics":{"Executor Run Time":120000,"Input Metrics":{"Bytes Read":1048576},"Output Metrics":{"Bytes Written":524288}}}
+{"Event":"SparkListenerTaskEnd","Stage ID":0,"Task Info":{},"Task Metrics":{"Executor Run Time":95000,"Input Metrics":{"Bytes Read":524288}}}
+{"Event":"SparkListenerJobEnd","Job ID":0,"Completion Time":1025000,"Job Result":{"Result":"JobSucceeded"}}
+{"Event":"SparkListenerJobStart","Job ID":1,"Submission Time":2000000,"Stage Infos":[{"Stage ID":1,"Stage Attempt ID":0,"Number of Tasks":1}]}
+{"Event":"SparkListenerTaskEnd","Stage ID":1,"Task Info":{},"Task Metrics":{"Executor Run Time":45000}}
+{"Event":"SparkListenerJobEnd","Job ID":1,"Completion Time":2012000,"Job Result":{"Result":"JobSucceeded"}}
