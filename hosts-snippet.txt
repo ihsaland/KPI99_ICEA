@@ -1,0 +1,5 @@
+# Add this line to /etc/hosts (macOS/Linux) or C:\Windows\System32\drivers\etc\hosts (Windows)
+# so that icea.kpi99.co resolves to your machine for local testing.
+# Requires admin/sudo to edit.
+
+127.0.0.1   icea.kpi99.co

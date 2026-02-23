@@ -26,6 +26,8 @@ PYTHONPATH=. python main.py
 
 Open **http://127.0.0.1:8000** in your browser.
 
+**Run as subdomain icea.kpi99.co (local):** see [SUBDOMAIN_SETUP.md](SUBDOMAIN_SETUP.md) for hosts entry and CORS.
+
 **Enable Tier 1 payments:** copy `.env.example` to `.env` and set `STRIPE_SECRET_KEY` (use `sk_test_...` for test mode). Restart the app.
 
 **Development only — demo mode:** set `ICEA_DEMO=1` to show a "Demo — get report" option that returns the PDF without payment. Do not set in production.
