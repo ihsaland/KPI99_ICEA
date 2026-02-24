@@ -18,8 +18,10 @@ RUN mkdir -p /data
 
 EXPOSE 8000
 
-# Health check: GET /v1/health
+# Railway and similar platforms set PORT at runtime; default 8000 for local Docker
+ENV PORT=8000
+# Health check: GET /v1/health (use PORT so it matches the app in cloud environments)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/v1/health', timeout=5)" || exit 1
+  CMD python -c "import os, urllib.request; port = os.environ.get('PORT', '8000'); urllib.request.urlopen(f'http://127.0.0.1:{port}/v1/health', timeout=5)" || exit 1
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
