@@ -6,7 +6,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request, HTTPException, File, UploadFile, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from icea.models import (
@@ -304,9 +304,13 @@ def checkout_tier1(body: CheckoutTier1Request, req: Request):
     Create Stripe Checkout for Tier 1 ($299). Returns checkout_url and token for success redirect.
     """
     if not get_stripe_secret_key():
-        raise HTTPException(
+        payment_link = os.environ.get("STRIPE_PAYMENT_LINK", "").strip() or None
+        return JSONResponse(
             status_code=503,
-            detail="Payment is not configured. Set STRIPE_SECRET_KEY to enable Tier 1 checkout.",
+            content={
+                "detail": "Payment is not configured. Set STRIPE_SECRET_KEY to enable Tier 1 checkout.",
+                "payment_link": payment_link,
+            },
         )
     request_dict = body.request.model_dump()
     token = create_pending_report(request_dict)

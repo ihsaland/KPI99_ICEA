@@ -105,11 +105,14 @@
     if (form) form.querySelectorAll(".row").forEach(function (row) { row.classList.remove("invalid"); });
   }
 
-  function setFormError(message) {
+  function setFormError(message, scrollIntoView) {
     var el = document.getElementById("form-error");
     if (!el) return;
     el.textContent = message || "";
     el.classList.toggle("hidden", !message);
+    if (message && scrollIntoView && el.scrollIntoView) {
+      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
   }
 
   function showPreview(data) {
@@ -166,7 +169,7 @@
       .finally(function () {});
   }
 
-  // Tier 1: checkout then redirect to Stripe
+  // Tier 1: checkout then redirect to Stripe (or show payment link fallback if not configured)
   function startTier1Checkout() {
     clearRowErrors();
     var payload = getPayload();
@@ -186,20 +189,49 @@
     })
       .then(function (res) {
         return res.json().then(function (j) {
-          if (!res.ok) throw new Error(j.detail || res.statusText);
+          if (!res.ok) {
+            var e = new Error(j.detail || res.statusText);
+            e.payment_link = j.payment_link || null;
+            throw e;
+          }
           return j;
         });
       })
       .then(function (data) {
         if (data.checkout_url) window.location.href = data.checkout_url;
-        else setFormError("No checkout URL returned.");
+        else setFormError("No checkout URL returned.", true);
       })
       .catch(function (err) {
-        setFormError(err.message || "Checkout failed.");
+        var msg = err.message || "Checkout failed.";
+        setFormError(msg, true);
+        if (err.payment_link) showPaymentLinkFallback(err.payment_link);
       })
       .finally(function () {
         if (btn) btn.disabled = false;
       });
+  }
+
+  function showPaymentLinkFallback(url) {
+    var el = document.getElementById("form-error");
+    if (!el || !url) return;
+    var prev = el.querySelector(".payment-link-fallback");
+    if (prev && prev.parentNode && prev.parentNode.parentNode) prev.parentNode.parentNode.removeChild(prev.parentNode);
+    var link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.className = "payment-link-fallback";
+    link.textContent = "Pay with payment link instead";
+    link.style.display = "inline-block";
+    link.style.marginTop = "8px";
+    link.style.fontWeight = "600";
+    link.style.color = "var(--kpi-accent, #3b82f6)";
+    var wrap = document.createElement("div");
+    wrap.style.marginTop = "6px";
+    wrap.appendChild(document.createTextNode("Report will not be tied to this analysis automatically."));
+    wrap.appendChild(document.createElement("br"));
+    wrap.appendChild(link);
+    el.appendChild(wrap);
   }
 
   // Tier 2/3: open modal, submit to request-expert
