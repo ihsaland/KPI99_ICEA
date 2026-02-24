@@ -65,30 +65,30 @@ def explanations_section() -> list[dict[str, str]]:
     return [
         {
             "title": "Efficiency score",
-            "body": "A 0–100 score reflecting how well CPU and memory are used on each node. "
-            "It is based on the fraction of node capacity used by executors; the remainder is 'waste'. "
-            "Higher is better. Low scores often mean executor size does not fit the node well.",
+            "body": "A 0–100 score showing how well CPU and memory are used on each node. "
+            "It is based on the fraction of node capacity used by executors; the remainder counts as waste. "
+            "Higher is better. Low scores usually mean executor size does not fit the node well.",
         },
         {
-            "title": "Waste (and waste cost)",
-            "body": "The share of node CPU and memory that is reserved for executors but not fully utilized by your workload, "
-            "plus any capacity left unused because executors do not pack evenly. "
+            "title": "Waste and waste cost",
+            "body": "Waste is the share of node CPU and memory reserved for executors but not fully used by your workload, "
+            "plus any capacity left over because executors do not pack evenly. "
             "Waste cost is the estimated dollar value of that unused capacity at your node price and usage.",
         },
         {
             "title": "Executors per node",
-            "body": "How many executors fit on one worker node given your executor cores and memory and the node's capacity. "
-            "More executors per node usually improve parallelism but can increase scheduling and GC overhead if too high.",
+            "body": "The number of executors that fit on one worker node given your executor cores, memory, and the node’s capacity. "
+            "More executors per node usually improve parallelism but can increase scheduling and GC overhead if the number is too high.",
         },
         {
-            "title": "Resource utilization (CPU / memory)",
-            "body": "The percentage of available node CPU and memory that is allocated to executors. "
-            "The rest is left for the OS and system processes. Utilization is constrained by the smaller of the two (CPU or memory).",
+            "title": "Resource utilization (CPU and memory)",
+            "body": "The percentage of available node CPU and memory allocated to executors. "
+            "The rest is reserved for the OS and system processes. Utilization is limited by the tighter of the two (CPU or memory).",
         },
         {
             "title": "Recommended configuration",
             "body": "An alternative executor size (cores and memory) that improves packing and reduces waste for the same node type. "
-            "Savings are estimated; actual results depend on workload behavior and tuning.",
+            "Savings are estimates; actual results depend on workload behavior and tuning.",
         },
     ]
 
@@ -96,12 +96,34 @@ def explanations_section() -> list[dict[str, str]]:
 def definitions_section() -> list[dict[str, str]]:
     """Glossary of terms for the report."""
     return [
-        {"term": "Node", "definition": "A worker machine in the cluster (e.g. an EC2 instance). Has a fixed number of vCPUs and memory (GB)."},
-        {"term": "Executor", "definition": "A Spark executor process running on a node. Each executor has a fixed number of cores and memory. Multiple executors can run on one node."},
-        {"term": "Packing", "definition": "The process of fitting executors onto nodes. Executors per node = min(available cores / executor cores, available memory / executor memory), after reserving overhead."},
-        {"term": "Waste", "definition": "Unused capacity: either CPU or memory left over after packing, or capacity allocated to executors but not fully utilized. Reported as a fraction (0–1) and as an estimated cost."},
-        {"term": "Reserve (cores / memory)", "definition": "Capacity reserved on each node for the OS, daemons, and system processes, not used for executors."},
-        {"term": "Utilization factor", "definition": "Optional multiplier (0–1) for shared clusters: the fraction of time the cluster is effectively used for this workload. Used to scale daily cost."},
+        {
+            "term": "Node",
+            "definition": "A worker machine in the cluster (e.g. an EC2 or Dataproc instance). Each node has a fixed number of vCPUs and memory (GB) available for executors after reserves.",
+        },
+        {
+            "term": "Executor",
+            "definition": "A Spark executor process running on a node. Each executor is configured with a fixed number of cores and memory (GB). Multiple executors can run on a single node.",
+        },
+        {
+            "term": "Packing",
+            "definition": "The process of fitting executors onto nodes. Executors per node = min(floor(available_cores / executor_cores), floor(available_memory / executor_memory)), after reserving capacity for the OS. The limiting resource (CPU or memory) determines the result.",
+        },
+        {
+            "term": "Waste",
+            "definition": "Unused capacity: CPU or memory left over after packing, or capacity allocated to executors but not fully utilized by the workload. Reported as a fraction (0–1) and as an estimated monthly cost (waste cost).",
+        },
+        {
+            "term": "Efficiency score",
+            "definition": "A 0–100 score derived from the waste fraction: 100 × (1 − waste). Higher means better use of node capacity; low scores indicate poor fit between executor size and node.",
+        },
+        {
+            "term": "Reserve (cores and memory)",
+            "definition": "Capacity reserved on each node for the OS, daemons, and system processes. This capacity is not used for executors and is excluded from packing calculations.",
+        },
+        {
+            "term": "Utilization factor",
+            "definition": "An optional multiplier (0–1) for shared clusters, representing the fraction of time the cluster is used for this workload. Applied to scale daily cost when the cluster runs other jobs.",
+        },
     ]
 
 
@@ -287,20 +309,20 @@ def methodology_section() -> list[dict[str, str]]:
     """How this was calculated: packing, cost, waste (for Methodology section)."""
     return [
         {
-            "title": "Packing",
+            "title": "Packing (executors per node)",
             "body": "Executors per node = min(floor((node_cores − reserve_cores) / executor_cores), "
             "floor((node_memory_gb − reserve_memory) / executor_memory_gb)). "
             "Efficiency score = 100 × (1 − waste), where waste = max(CPU waste, memory waste) after packing. "
-            "See icea/packing.py for the implementation.",
+            "Implementation: icea/packing.py.",
         },
         {
-            "title": "Cost",
+            "title": "Cost (daily and monthly)",
             "body": "Hourly cluster cost = node_hourly_price × node_count. "
             "Daily cost = hourly_cluster_cost × (avg_runtime_minutes / 60) × jobs_per_day × utilization_factor. "
-            "Monthly cost ≈ daily_cost × 30. See icea/cost_model.py.",
+            "Monthly cost ≈ daily_cost × 30. Implementation: icea/cost_model.py.",
         },
         {
-            "title": "Waste",
+            "title": "Waste and waste cost",
             "body": "Waste is the unused fraction of allocated capacity (CPU or memory left over after packing, "
             "or capacity not fully utilized by the workload). Waste cost = daily_cost × waste × 30.",
         },

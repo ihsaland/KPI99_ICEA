@@ -1,4 +1,4 @@
-/* ICEA — formatted after KPI99 (Manrope, nav, hero, footer, colors) */
+/* ICEA — formatting from kpi99 (Manrope, nav, hero, colors #333, #334155, #3b82f6, #fafafa) */
 * {
     margin: 0;
     padding: 0;
@@ -12,7 +12,7 @@ html {
 body {
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
     line-height: 1.6;
-    color: #1e293b;
+    color: #333;
     background: #fafafa;
     min-height: 100vh;
     overflow-x: hidden;
@@ -210,6 +210,12 @@ nav .nav-product {
 }
 .path-2 .path__badge {
     background: #0f766e;
+}
+.path-overview {
+    border-left: 4px solid #3b82f6;
+}
+.path__badge--overview {
+    background: #1e3a8a;
 }
 .path__title {
     font-size: 1.4rem;

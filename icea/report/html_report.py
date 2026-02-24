@@ -95,14 +95,19 @@ def generate_report_html(
     .header .brand {{ font-weight: 700; color: {KPI99_DARK}; }}
     .header .tagline {{ font-size: 0.85rem; color: {KPI99_MUTED}; }}
     h1 {{ font-size: 1.75rem; color: {KPI99_DARK}; margin: 0 0 4px 0; }}
-    .subtitle {{ font-size: 0.9rem; color: {KPI99_MUTED}; margin-bottom: 24px; }}
-    h2 {{ font-size: 1.15rem; color: {KPI99_ACCENT_DARK}; margin: 24px 0 12px 0; }}
-    h3 {{ font-size: 1rem; color: {KPI99_DARK}; margin: 16px 0 8px 0; }}
+    .subtitle {{ font-size: 0.9rem; color: {KPI99_MUTED}; margin-bottom: 16px; line-height: 1.5; }}
+    .section-intro {{ font-size: 0.9rem; color: {KPI99_MUTED}; margin: -4px 0 16px 0; line-height: 1.5; }}
+    h2 {{ font-size: 1.25rem; font-weight: 700; color: {KPI99_ACCENT_DARK}; margin: 32px 0 0 0; padding-bottom: 8px; border-bottom: 2px solid {KPI99_ACCENT}; letter-spacing: 0.02em; }}
+    h2:first-of-type {{ margin-top: 0; }}
+    h3 {{ font-size: 1rem; font-weight: 600; color: {KPI99_DARK}; margin: 18px 0 6px 0; }}
     p {{ margin: 0 0 8px 0; color: {KPI99_DARK}; }}
     table {{ width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }}
-    th, td {{ border: 1px solid {KPI99_GRID}; padding: 10px 12px; text-align: left; }}
+    th, td {{ border: 1px solid {KPI99_GRID}; padding: 10px 12px; text-align: left; vertical-align: top; }}
     th {{ background: {KPI99_ACCENT_DARK}; color: white; font-weight: 600; }}
     tr:nth-child(even) {{ background: #f8fafc; }}
+    table.definitions-table {{ margin-top: 8px; }}
+    table.definitions-table td:first-child {{ font-weight: 600; color: {KPI99_ACCENT_DARK}; width: 28%; min-width: 140px; }}
+    table.definitions-table td:last-child {{ line-height: 1.5; }}
     .bar-wrap {{ margin: 8px 0; }}
     .bar {{ height: 20px; border-radius: 4px; margin: 4px 0; }}
     .bar-label {{ font-size: 0.85rem; color: {KPI99_MUTED}; margin-bottom: 2px; }}
@@ -267,7 +272,7 @@ def generate_report_html(
 </ul>
 {"<h2>Risks & Mitigations</h2><table><tbody><tr><th>Risk</th><th>Mitigation</th></tr>" + "".join(f"<tr><td>{rm['risk']}</td><td>{rm['mitigation']}</td></tr>" for rm in risks_mitigations) + "</tbody></table>" if risks_mitigations else ""}
 <h2>Methodology</h2>
-<p class="subtitle">How this was calculated.</p>
+<p class="section-intro">How this was calculated.</p>
 {"".join(f"<h3>{m['title']}</h3><p>{m['body']}</p>" for m in methodology)}
 <h2>Sensitivity (What-If)</h2>
 <p class="subtitle">If node count or runtime changes, estimated monthly cost scales roughly as follows:</p>
@@ -283,10 +288,11 @@ def generate_report_html(
 <p>{tier_cta}</p>
 <p>{rerun}</p>
 <h2>Understanding This Report</h2>
-<p class="subtitle">Brief explanations of the metrics and terms used above.</p>
+<p class="section-intro">Brief explanations of the metrics and terms used in this report.</p>
 {explanations_html}
 <h2>Definitions</h2>
-<table><tbody><tr><th>Term</th><th>Definition</th></tr>{definitions_html}</tbody></table>
+<p class="section-intro">Key terms used in this report.</p>
+<table class="definitions-table"><tbody><tr><th>Term</th><th>Definition</th></tr>{definitions_html}</tbody></table>
 <div class="footer">ICEA report v{meta["report_version"]}. {meta["copyright"]}</div>
 </div>
 </body>

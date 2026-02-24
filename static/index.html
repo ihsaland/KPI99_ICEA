@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MKZ889ZT');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -18,6 +25,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Google tag (gtag.js) - GA4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7MQY2WJ67"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-M7MQY2WJ67');
+    </script>
+    <!-- Google tag (gtag.js) - Google Ads -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17859706167"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'AW-17859706167');
+    </script>
 
     <link rel="stylesheet" href="/styles.css">
 </head>
@@ -44,8 +68,12 @@
             <div class="container">
                 <p class="intro">Enter your cluster and workload to see efficiency and waste. Then choose a tier to get your report.</p>
 
-                <div class="instructions card instructions--compact">
-                    <p class="instructions__lead">Two ways to analyze:</p>
+                <div class="path path-overview">
+                    <div class="path__header">
+                        <span class="path__badge path__badge--overview">Overview</span>
+                        <h2 class="path__title">Two ways to analyze</h2>
+                        <p class="path__desc">Choose sizing & cost (Path 1) or job-level analysis from an event log (Path 2).</p>
+                    </div>
                     <ul class="instructions-list instructions-list--paths">
                         <li class="instructions-step"><a href="#path-1" class="instructions-link">Path 1 — Sizing & cost</a>: Configure cluster and workload → see preview → pay or view report.</li>
                         <li class="instructions-step"><a href="#path-2" class="instructions-link">Path 2 — Job-level from event log</a>: Upload log → ingest → download job-level PDF (no payment).</li>
@@ -396,5 +424,9 @@
             onScroll();
         })();
     </script>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MKZ889ZT"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 </body>
 </html>

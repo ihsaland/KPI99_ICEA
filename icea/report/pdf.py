@@ -82,9 +82,9 @@ def _styles():
     styles["ICEA_H2"] = ParagraphStyle(
         name="ICEA_H2",
         fontName="Helvetica-Bold",
-        fontSize=12.5,
-        textColor=COLOR_DARK,
-        spaceBefore=14,
+        fontSize=13,
+        textColor=colors.HexColor(KPI99_ACCENT_DARK),
+        spaceBefore=20,
         spaceAfter=6,
     )
     styles["ICEA_Body"] = ParagraphStyle(
@@ -212,10 +212,10 @@ def _draw_cost_breakdown(total: float, waste: float, savings: float) -> Drawing:
     return d
 
 
-def _table_with_header(data, col_widths=None):
-    """Table with header row (KPI99 dark blue), grid, padding 6–8 px."""
+def _table_with_header(data, col_widths=None, definitions_style=False):
+    """Table with header row (KPI99 dark blue), grid, padding. definitions_style: bold term column, light bg."""
     t = Table(data, colWidths=col_widths)
-    t.setStyle(TableStyle([
+    style = [
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(COLOR_TABLE_HEADER)),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
@@ -229,9 +229,14 @@ def _table_with_header(data, col_widths=None):
         ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor(COLOR_GRID)),
         ("LEFTPADDING", (0, 0), (-1, -1), 8),
         ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-        ("TOPPADDING", (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-    ]))
+        ("TOPPADDING", (0, 0), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+    ]
+    if definitions_style and len(data) > 1:
+        style.append(("FONTNAME", (0, 1), (0, -1), "Helvetica-Bold"))
+        style.append(("TEXTCOLOR", (0, 1), (0, -1), colors.HexColor(KPI99_ACCENT_DARK)))
+        style.append(("BACKGROUND", (0, 1), (0, -1), colors.HexColor("#f0f9ff")))
+    t.setStyle(TableStyle(style))
     return t
 
 
@@ -451,11 +456,13 @@ def generate_report_pdf(
 
     # Definitions (glossary)
     story.append(Paragraph("Definitions", styles["ICEA_H2"]))
+    story.append(Paragraph("Key terms used in this report.", styles["ICEA_Small"]))
+    story.append(Spacer(1, 0.12 * inch))
     defs = definitions_section()
     def_data = [["Term", "Definition"]]
     for d in defs:
         def_data.append([d["term"], d["definition"]])
-    story.append(_table_with_header(def_data, [1.5 * inch, 4 * inch]))
+    story.append(_table_with_header(def_data, [1.6 * inch, 4.2 * inch], definitions_style=True))
     story.append(Spacer(1, SECTION_SPACER))
 
     footer_cb = _make_footer(static_dir)
