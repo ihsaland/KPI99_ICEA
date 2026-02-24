@@ -39,7 +39,10 @@ def verify_api_key(
 
 
 def _is_demo_enabled() -> bool:
-    """True if ICEA_DEMO is set to a value that enables demo (1, true, yes)."""
+    """True if ICEA_DEMO is set to a value that enables demo (1, true, yes). Never True when ICEA_ENV or NODE_ENV is production."""
+    env = (os.environ.get("ICEA_ENV") or os.environ.get("NODE_ENV") or "").strip().lower()
+    if env in ("production", "prod"):
+        return False
     v = (os.environ.get("ICEA_DEMO") or "").strip().lower()
     return v in ("1", "true", "yes")
 
