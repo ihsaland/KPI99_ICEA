@@ -339,16 +339,22 @@
     });
   }
 
-  // Demo mode: show demo card only when backend has ICEA_DEMO=1
+  // Demo option: visible only when backend allows demo (not in production)
+  var demoCard = document.getElementById("demo-tier-card");
   fetch("/v1/health")
     .then(function (r) { return r.json(); })
     .then(function (data) {
-      if (data.demo_available) {
-        var card = document.getElementById("demo-tier-card");
-        if (card) card.classList.remove("hidden");
+      if (demoCard) {
+        if (data.demo_available) {
+          demoCard.classList.remove("hidden");
+        } else {
+          demoCard.classList.add("hidden");
+        }
       }
     })
-    .catch(function () {});
+    .catch(function () {
+      if (demoCard) demoCard.classList.add("hidden");
+    });
 
   // Event log ingest and job-level PDF
   var lastEventlogResult = null;
