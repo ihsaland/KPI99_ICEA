@@ -188,11 +188,17 @@
       body: JSON.stringify(body),
     })
       .then(function (res) {
-        return res.json().then(function (j) {
+        return res.text().then(function (text) {
+          var j;
+          try {
+            j = text ? JSON.parse(text) : {};
+          } catch (e) {
+            j = {};
+          }
           if (!res.ok) {
-            var e = new Error(j.detail || res.statusText);
-            e.payment_link = j.payment_link || null;
-            throw e;
+            var err = new Error(typeof j.detail === "string" ? j.detail : res.statusText || "Checkout failed.");
+            err.payment_link = j.payment_link || null;
+            throw err;
           }
           return j;
         });
@@ -203,6 +209,7 @@
       })
       .catch(function (err) {
         var msg = err.message || "Checkout failed.";
+        if (msg === "Internal Server Error" || (msg.length > 0 && msg.indexOf("Internal S") === 0)) msg = "Server error. Please try again. If you run the app locally, ensure STRIPE_SECRET_KEY is set in .env.";
         setFormError(msg, true);
         if (err.payment_link) showPaymentLinkFallback(err.payment_link);
       })
