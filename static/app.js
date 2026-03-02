@@ -10,6 +10,17 @@
 
   var catalogInstances = [];
 
+  /** Locale path prefix for /es/ or /en/ (from ICEA_LANG or pathname). Used for success/cancel URLs. */
+  function getLocalePathPrefix() {
+    var lang = (window.ICEA_LANG || "").toLowerCase();
+    if (lang === "es") return "/es";
+    if (lang === "en") return "/en";
+    var p = (window.location.pathname || "");
+    if (p.indexOf("/es/") === 0 || p === "/es") return "/es";
+    if (p.indexOf("/en/") === 0 || p === "/en") return "/en";
+    return "";
+  }
+
   function getPayload() {
     var v = function (id) { return document.getElementById(id); };
     var num = function (id, def) { var n = parseFloat(v(id) && v(id).value); return (n !== undefined && !isNaN(n)) ? n : def; };
@@ -172,11 +183,14 @@
   // Tier 1: checkout then redirect to Stripe (or show payment link fallback if not configured)
   function startTier1CheckoutWithRequest(requestPayload) {
     clearRowErrors();
-    var successBase = window.location.origin + "/report-success.html";
+    var localePrefix = getLocalePathPrefix();
+    var pathBase = localePrefix ? localePrefix + "/" : "/";
+    var successBase = window.location.origin + pathBase + "report-success.html";
+    var cancelUrl = window.location.origin + pathBase;
     var body = {
       request: requestPayload,
       success_url_base: successBase,
-      cancel_url: window.location.origin + "/",
+      cancel_url: cancelUrl,
       amount_cents: 14900,
     };
     var tier1Btns = document.querySelectorAll('.btn-tier[data-tier="1"]');
@@ -254,7 +268,10 @@
 
   function openExpertModal(tier, configOverride) {
     expertTier.value = tier;
-    expertModalTitle.textContent = tier === "3" ? "Request Enterprise Analysis" : "Request Expert Analysis";
+    var isEs = (window.ICEA_LANG || "").toLowerCase() === "es";
+    expertModalTitle.textContent = tier === "3"
+      ? (isEs ? "Solicitar análisis empresarial" : "Request Enterprise Analysis")
+      : (isEs ? "Solicitar análisis experto" : "Request Expert Analysis");
     expertModalConfigOverride = configOverride || null;
     if (expertModal) expertModal.classList.remove("hidden");
   }

@@ -7,8 +7,6 @@ from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException, File, UploadFile, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response, JSONResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-
 from icea.models import (
     AnalyzeRequest,
     AnalyzeResponse,
@@ -274,8 +272,9 @@ def _report_pdf(
     request: AnalyzeRequest,
     static_dir: Path | None,
     app_url: str | None = None,
+    lang: str = "en",
 ) -> bytes:
-    """Generate report PDF (sync, for timeout wrapper)."""
+    """Generate report PDF (sync, for timeout wrapper). lang=en|es for report language."""
     assumptions = request.assumptions or Assumptions()
     packing = compute_packing(request.node, request.executor, assumptions)
     cost = compute_cost(
@@ -297,6 +296,7 @@ def _report_pdf(
         request, packing, cost, rec, risk,
         static_dir=static_dir,
         app_url=app_url,
+        lang=lang,
     )
 
 
@@ -387,11 +387,14 @@ def checkout_tier1(body: CheckoutTier1Request, req: Request):
 
 
 @app.get("/v1/report-paid")
-def report_paid(token: str, req: Request, format: str | None = None):
+def report_paid(token: str, req: Request, format: str | None = None, lang: str | None = None):
     """
     After Tier 1 payment success: view KPI99 report in HTML (default) or download PDF (?format=pdf).
-    Token is consumed only when format=pdf.
+    Token is consumed only when format=pdf. Optional lang=en|es for report language (default en).
     """
+    report_lang = (lang or "en").strip().lower() if lang else "en"
+    if report_lang not in ("en", "es"):
+        report_lang = "en"
     if (format or "").lower() == "pdf":
         request_dict = consume_pending_report(token)
         if not request_dict:
@@ -407,6 +410,7 @@ def report_paid(token: str, req: Request, format: str | None = None):
                 request_obj,
                 static_dir,
                 base,
+                report_lang,
             )
         except TimeoutError:
             raise HTTPException(status_code=504, detail="Report generation timed out.")
@@ -442,6 +446,7 @@ def report_paid(token: str, req: Request, format: str | None = None):
         request_obj, packing, cost, rec, risk,
         pdf_download_url=pdf_url,
         app_url=base,
+        lang=report_lang,
     )
     return HTMLResponse(html)
 
@@ -654,8 +659,7 @@ def sample_eventlog_response():
 
 
 def mount_static(app: FastAPI, static_dir: Path):
-    """Mount static frontend if directory exists. Store for report logo path."""
+    """Register static dir for report assets (logo, favicon). Do NOT mount StaticFiles at /
+    so that main.py explicit routes for /, /es/, /en/ and the catch-all serve the correct HTML."""
     resolved = Path(static_dir).resolve()
     app.state.static_dir = resolved
-    if resolved.is_dir():
-        app.mount("/", StaticFiles(directory=str(resolved), html=True), name="static")
