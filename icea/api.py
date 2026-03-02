@@ -329,6 +329,18 @@ def report(
     )
 
 
+@app.get("/v1/payment-link")
+def payment_link_redirect():
+    """
+    Redirect to the Stripe Payment Link (STRIPE_PAYMENT_LINK) for Tier 1.
+    Used by the sample report preview "Get your full report" CTA. If not set, redirects to /.
+    """
+    link = (os.environ.get("STRIPE_PAYMENT_LINK") or "").strip()
+    if link and link.startswith("http"):
+        return RedirectResponse(url=link, status_code=302)
+    return RedirectResponse(url="/", status_code=302)
+
+
 @app.post("/v1/checkout/tier1")
 def checkout_tier1(body: CheckoutTier1Request, req: Request):
     """
@@ -372,19 +384,6 @@ def checkout_tier1(body: CheckoutTier1Request, req: Request):
             content={"detail": "Could not create checkout session.", "payment_link": payment_link},
         )
     return {"checkout_url": checkout_url, "token": token}
-
-
-@app.get("/v1/pay")
-def pay_redirect(req: Request):
-    """
-    Redirect to Stripe payment link (Tier 1) if STRIPE_PAYMENT_LINK is set; otherwise redirect to app home.
-    Used by the sample report preview "Get your full report" button.
-    """
-    payment_link = (os.environ.get("STRIPE_PAYMENT_LINK") or "").strip()
-    if payment_link:
-        return RedirectResponse(url=payment_link, status_code=302)
-    base = str(req.base_url).rstrip("/")
-    return RedirectResponse(url=f"{base}/", status_code=302)
 
 
 @app.get("/v1/report-paid")
