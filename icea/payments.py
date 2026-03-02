@@ -1,5 +1,6 @@
 """Payment and tier logic for ICEA (Stripe Tier 1, request forms Tier 2/3)."""
 import os
+import time
 from typing import Optional
 
 from icea.store import create_pending_report as _store_create
@@ -55,6 +56,6 @@ def create_checkout_session(
         success_url=success_url,
         cancel_url=cancel_url,
         metadata={"icea_token": token, "tier": "1"},
-        expires_in=1800,
+        expires_at=int(time.time()) + 1800,
     )
     return session.url
