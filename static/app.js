@@ -337,11 +337,7 @@
   // Tier buttons (Path 1: form payload; Path 2: derived from event log)
   document.querySelectorAll(".btn-tier[data-tier='1']").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      if (btn.getAttribute("data-path") === "2" && lastPath2AnalyzeResult && lastPath2AnalyzeResult.request) {
-        startTier1CheckoutWithRequest(lastPath2AnalyzeResult.request);
-      } else {
-        startTier1Checkout();
-      }
+      window.location.href = "/v1/payment-link";
     });
   });
   document.querySelectorAll(".btn-tier[data-tier='2']").forEach(function (btn) {
