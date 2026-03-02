@@ -688,6 +688,33 @@ nav .nav-product {
 .tier-card-demo code { font-size: 0.8rem; background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 4px; }
 
 /* Sidebar: stacked tier cards (compact) */
+/* Tier 1 report value + sample link (sidebar) */
+.report-value {
+    margin-bottom: 1rem;
+}
+.report-value h2 {
+    font-size: 1.1rem;
+    margin: 0 0 0.5rem 0;
+    color: #1e3a8a;
+}
+.report-value__desc {
+    font-size: 0.9rem;
+    color: #475569;
+    line-height: 1.5;
+    margin: 0 0 0.75rem 0;
+}
+.report-value__sample {
+    margin: 0;
+}
+.report-value__link {
+    font-weight: 600;
+    color: var(--kpi-accent, #3b82f6);
+    text-decoration: none;
+}
+.report-value__link:hover {
+    text-decoration: underline;
+}
+
 .pricing--sidebar .tier-cards--stack {
     display: flex;
     flex-direction: column;

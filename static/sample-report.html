@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPI99 ICEA Report | KPI99</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root { --kpi-dark: #1e293b; --kpi-muted: #64748b; --kpi-accent: #3b82f6; --kpi-accent-dark: #1e3a8a; --kpi-grid: #e2e8f0; --kpi-success: #10b981; --kpi-warn: #ef4444; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif; color: #1e293b; background: #f8fafc; margin: 0; padding: 24px; line-height: 1.5; }
+    .report { max-width: 800px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; }
+    .header img.favicon { width: 32px; height: 32px; }
+    .header .brand { font-weight: 700; color: #1e293b; }
+    .header .tagline { font-size: 0.85rem; color: #64748b; }
+    h1 { font-size: 1.75rem; color: #1e293b; margin: 0 0 4px 0; }
+    .subtitle { font-size: 0.9rem; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
+    .section-intro { font-size: 0.9rem; color: #64748b; margin: -4px 0 16px 0; line-height: 1.5; }
+    h2 { font-size: 1.25rem; font-weight: 700; color: #1e3a8a; margin: 32px 0 0 0; padding-bottom: 8px; border-bottom: 2px solid #3b82f6; letter-spacing: 0.02em; }
+    h2:first-of-type { margin-top: 0; }
+    h3 { font-size: 1rem; font-weight: 600; color: #1e293b; margin: 18px 0 6px 0; }
+    p { margin: 0 0 8px 0; color: #1e293b; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+    th, td { border: 1px solid #e2e8f0; padding: 10px 12px; text-align: left; vertical-align: top; }
+    th { background: #1e3a8a; color: white; font-weight: 600; }
+    tr:nth-child(even) { background: #f8fafc; }
+    table.definitions-table { margin-top: 8px; }
+    table.definitions-table td:first-child { font-weight: 600; color: #1e3a8a; width: 28%; min-width: 140px; }
+    table.definitions-table td:last-child { line-height: 1.5; }
+    .bar-wrap { margin: 8px 0; }
+    .bar { height: 20px; border-radius: 4px; margin: 4px 0; }
+    .bar-label { font-size: 0.85rem; color: #64748b; margin-bottom: 2px; }
+    .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; }
+    .btn-pdf { display: inline-block; background: #3b82f6; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px; border: none; cursor: pointer; font-size: 1rem; }
+    .btn-pdf:hover { background: #1e3a8a; }
+    ul { margin: 8px 0; padding-left: 20px; }
+    li { margin: 4px 0; color: #1e293b; }
+    </style>
+</head>
+<body>
+<div class="report">
+<div class="header">
+<img src="/favicon.png" alt="" class="favicon" width="32" height="32">
+<div>
+<div class="brand">KPI99</div>
+<div class="tagline">Performance. Scale. Reliability—Engineered.</div>
+</div>
+</div>
+<h1>Infrastructure Cost & Efficiency Report</h1>
+<p class="subtitle">March 01, 2026</p>
+
+<h2>Executive Summary</h2>
+<p>This report analyzes your Spark cluster configuration: 10 node(s), 4 cores and 16 GB memory per executor, with an average of 30.0 minutes runtime and 100 jobs per day. The current configuration packs 4 executor(s) per node (total 40 executors). The packing efficiency score is 100/100: higher means less idle CPU and memory. Estimated monthly cost from this workload is approximately $12,750.00; of that, about $0.00/month is attributed to resource waste (unused capacity). Consider adjusting executor size or node count to improve utilization and reduce waste.</p>
+<p style="margin-top: 12px;">Efficiency score: <strong>100/100</strong>. Estimated monthly waste: <strong>$0.00</strong>.</p>
+<p class="subtitle">Your efficiency score (100/100) is above typical for similar clusters.</p>
+<h2>Current vs Recommended Configuration</h2>
+<table><tbody><tr><th></th><th>Current</th><th>Recommended</th></tr>
+<tr><td>Executor cores</td><td>4</td><td>2</td></tr>
+<tr><td>Executor memory (GB)</td><td>16.0</td><td>8.0</td></tr>
+<tr><td>Executors per node</td><td>4</td><td>8</td></tr>
+<tr><td>Efficiency score</td><td>100</td><td>100</td></tr></tbody></table>
+<h2>Resource Utilization</h2>
+<div class="bar-wrap"><div class="bar-label">CPU</div><div class="bar" style="width: 100%; max-width: 300px; background: linear-gradient(to right, #3b82f6 0%, #3b82f6 100.0%, #e2e8f0 100.0%, #e2e8f0 100%);"></div><span>100.0%</span></div>
+<div class="bar-wrap"><div class="bar-label">Memory</div><div class="bar" style="width: 100%; max-width: 300px; background: linear-gradient(to right, #10b981 0%, #10b981 100.0%, #e2e8f0 100.0%, #e2e8f0 100%);"></div><span>100.0%</span></div>
+<h2>Cost Breakdown (Monthly)</h2>
+<p class="subtitle">Monthly cost is approximately $12,750.00 from node price × usage; $0.00 of that is estimated waste (unused allocated capacity).</p>
+<div class="bar-wrap"><div class="bar-label">Total $12,750/mo (utilized vs waste)</div><div class="bar" style="width: 100%; max-width: 300px; background: linear-gradient(to right, #10b981 0%, #10b981 100.0%, #ef4444 100.0%, #ef4444 100%);"></div></div>
+
+<h2>Cost Model Assumptions</h2>
+<table><tbody><tr><th>Input</th><th>Value</th></tr><tr><td>Cloud</td><td>aws</td></tr>
+<tr><td>Region</td><td>us-east-1</td></tr>
+<tr><td>Instance Type</td><td>r6g.4xlarge</td></tr>
+<tr><td>Node Cores</td><td>16</td></tr>
+<tr><td>Node Memory Gb</td><td>64.0</td></tr>
+<tr><td>Node Hourly Cost Usd</td><td>0.85</td></tr>
+<tr><td>Node Count</td><td>10</td></tr>
+<tr><td>Avg Runtime Minutes</td><td>30.0</td></tr>
+<tr><td>Jobs Per Day</td><td>100.0</td></tr>
+<tr><td>Hourly Cluster Cost Usd</td><td>8.50</td></tr>
+<tr><td>Daily Cost Usd</td><td>425.00</td></tr></tbody></table>
+<h2>Savings Projection</h2>
+<table><tbody><tr><th>Metric</th><th>USD</th></tr><tr><td>Waste cost (daily)</td><td>0.00</td></tr>
+<tr><td>Waste cost (monthly)</td><td>0.00</td></tr>
+<tr><td>Projected savings (monthly)</td><td>0.00</td></tr></tbody></table>
+<p class="subtitle">Estimates are directional and depend on workload behavior.</p>
+
+<h2>Engineering Notes</h2>
+<ul>
+<li>Memory is the dominant constraint; consider increasing executor memory or reducing memory per executor to improve packing.</li><li>Estimates are directional and depend on actual workload behavior, I/O, and shuffle patterns.</li>
+</ul>
+<h2>Next Steps</h2>
+<ul>
+<li>Try the recommended executor configuration in a staging or dev environment before rolling out to production.</li><li>Capture peak executor memory from Spark UI (Executor → Storage Memory / peak) and re-run the analysis for better OOM and sizing guidance.</li><li>Re-run this analysis after significant workload changes (e.g. new jobs, more data, different runtime).</li>
+</ul>
+
+<h2>Methodology</h2>
+<p class="section-intro">How this was calculated.</p>
+<h3>Packing (executors per node)</h3><p>Executors per node = min(floor((node_cores − reserve_cores) / executor_cores), floor((node_memory_gb − reserve_memory) / executor_memory_gb)). Efficiency score = 100 × (1 − waste), where waste = max(CPU waste, memory waste) after packing. Implementation: icea/packing.py.</p><h3>Cost (daily and monthly)</h3><p>Hourly cluster cost = node_hourly_price × node_count. Daily cost = hourly_cluster_cost × (avg_runtime_minutes / 60) × jobs_per_day × utilization_factor. Monthly cost ≈ daily_cost × 30. Implementation: icea/cost_model.py.</p><h3>Waste and waste cost</h3><p>Waste is the unused fraction of allocated capacity (CPU or memory left over after packing, or capacity not fully utilized by the workload). Waste cost = daily_cost × waste × 30.</p>
+<h2>Sensitivity (What-If)</h2>
+<p class="subtitle">If node count or runtime changes, estimated monthly cost scales roughly as follows:</p>
+<ul>
+<li>Current: $12,750.00/month</li>
+<li>If node count → 11: ≈ $14,025.00/month</li>
+<li>If node count → 9: ≈ $11,475.00/month</li>
+<li>If avg runtime +20%: ≈ $15,300.00/month</li>
+</ul>
+<h2>Data Quality & Inputs</h2>
+<p class="subtitle">No optional workload inputs were provided. Adding peak executor memory from Spark UI will improve OOM and sizing guidance.</p>
+<h2>Further Analysis</h2>
+<p>For a detailed review and custom optimization plan, request Tier 2 Expert or Tier 3 Enterprise analysis (contact via your KPI99 account or the ICEA app).</p>
+<p>Update your configuration and re-run the analysis in your ICEA dashboard.</p>
+<h2>Understanding This Report</h2>
+<p class="section-intro">Brief explanations of the metrics and terms used in this report.</p>
+<h3>Efficiency score</h3><p>A 0–100 score showing how well CPU and memory are used on each node. It is based on the fraction of node capacity used by executors; the remainder counts as waste. Higher is better. Low scores usually mean executor size does not fit the node well.</p><h3>Waste and waste cost</h3><p>Waste is the share of node CPU and memory reserved for executors but not fully used by your workload, plus any capacity left over because executors do not pack evenly. Waste cost is the estimated dollar value of that unused capacity at your node price and usage.</p><h3>Executors per node</h3><p>The number of executors that fit on one worker node given your executor cores, memory, and the node’s capacity. More executors per node usually improve parallelism but can increase scheduling and GC overhead if the number is too high.</p><h3>Resource utilization (CPU and memory)</h3><p>The percentage of available node CPU and memory allocated to executors. The rest is reserved for the OS and system processes. Utilization is limited by the tighter of the two (CPU or memory).</p><h3>Recommended configuration</h3><p>An alternative executor size (cores and memory) that improves packing and reduces waste for the same node type. Savings are estimates; actual results depend on workload behavior and tuning.</p>
+<h2>Definitions</h2>
+<p class="section-intro">Key terms used in this report.</p>
+<table class="definitions-table"><tbody><tr><th>Term</th><th>Definition</th></tr><tr><td><strong>Node</strong></td><td>A worker machine in the cluster (e.g. an EC2 or Dataproc instance). Each node has a fixed number of vCPUs and memory (GB) available for executors after reserves.</td></tr><tr><td><strong>Executor</strong></td><td>A Spark executor process running on a node. Each executor is configured with a fixed number of cores and memory (GB). Multiple executors can run on a single node.</td></tr><tr><td><strong>Packing</strong></td><td>The process of fitting executors onto nodes. Executors per node = min(floor(available_cores / executor_cores), floor(available_memory / executor_memory)), after reserving capacity for the OS. The limiting resource (CPU or memory) determines the result.</td></tr><tr><td><strong>Waste</strong></td><td>Unused capacity: CPU or memory left over after packing, or capacity allocated to executors but not fully utilized by the workload. Reported as a fraction (0–1) and as an estimated monthly cost (waste cost).</td></tr><tr><td><strong>Efficiency score</strong></td><td>A 0–100 score derived from the waste fraction: 100 × (1 − waste). Higher means better use of node capacity; low scores indicate poor fit between executor size and node.</td></tr><tr><td><strong>Reserve (cores and memory)</strong></td><td>Capacity reserved on each node for the OS, daemons, and system processes. This capacity is not used for executors and is excluded from packing calculations.</td></tr><tr><td><strong>Utilization factor</strong></td><td>An optional multiplier (0–1) for shared clusters, representing the fraction of time the cluster is used for this workload. Applied to scale daily cost when the cluster runs other jobs.</td></tr></tbody></table>
+<div class="footer">ICEA report v0.1.0. © 2026 KPI99 LLC. All rights reserved.</div>
+</div>
+</body>
+</html>
