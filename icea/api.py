@@ -301,7 +301,7 @@ def report(
 @app.post("/v1/checkout/tier1")
 def checkout_tier1(body: CheckoutTier1Request, req: Request):
     """
-    Create Stripe Checkout for Tier 1 ($299). Returns checkout_url and token for success redirect.
+    Create Stripe Checkout for Tier 1 ($149). Returns checkout_url and token for success redirect.
     """
     if not get_stripe_secret_key():
         payment_link = os.environ.get("STRIPE_PAYMENT_LINK", "").strip() or None
@@ -312,20 +312,34 @@ def checkout_tier1(body: CheckoutTier1Request, req: Request):
                 "payment_link": payment_link,
             },
         )
-    request_dict = body.request.model_dump()
-    token = create_pending_report(request_dict)
-    base = str(req.base_url).rstrip("/")
-    success_url = (body.success_url_base or f"{base}/report-success.html") + f"?token={token}"
-    cancel_url = body.cancel_url or base + "/"
-    amount = body.amount_cents if body.amount_cents is not None else 29900
-    checkout_url = create_checkout_session(
-        token=token,
-        amount_cents=amount,
-        success_url=success_url,
-        cancel_url=cancel_url,
-    )
+    try:
+        request_dict = body.request.model_dump()
+        token = create_pending_report(request_dict)
+        base = str(req.base_url).rstrip("/")
+        success_url = (body.success_url_base or f"{base}/report-success.html") + f"?token={token}"
+        cancel_url = body.cancel_url or base + "/"
+        amount = body.amount_cents if body.amount_cents is not None else 14900
+        checkout_url = create_checkout_session(
+            token=token,
+            amount_cents=amount,
+            success_url=success_url,
+            cancel_url=cancel_url,
+        )
+    except Exception as e:
+        _LOG.exception("Checkout failed")
+        return JSONResponse(
+            status_code=503,
+            content={
+                "detail": f"Checkout failed: {str(e)}",
+                "payment_link": (os.environ.get("STRIPE_PAYMENT_LINK", "").strip() or None),
+            },
+        )
     if not checkout_url:
-        raise HTTPException(status_code=503, detail="Could not create checkout session.")
+        payment_link = os.environ.get("STRIPE_PAYMENT_LINK", "").strip() or None
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Could not create checkout session.", "payment_link": payment_link},
+        )
     return {"checkout_url": checkout_url, "token": token}
 
 

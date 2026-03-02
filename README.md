@@ -6,7 +6,7 @@ Lightweight diagnostic tool that converts Spark cluster and executor configurati
 
 | Tier | Price | What you get |
 |------|--------|----------------|
-| **Tier 1 — Automated Report** | $299 | Upload config → receive PDF report (Stripe checkout). |
+| **Tier 1 — Automated Report** | $149 | Upload config → receive PDF report (Stripe checkout). |
 | **Tier 2 — Expert Analysis** | $1,500–$5,000 | Tool output + manual review, optimization recommendations, configuration guidance. |
 | **Tier 3 — Enterprise** | $5,000+ | Custom scope, dedicated review, ongoing support. |
 

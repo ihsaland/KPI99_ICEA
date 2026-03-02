@@ -178,7 +178,7 @@
       request: payload,
       success_url_base: successBase,
       cancel_url: window.location.origin + "/",
-      amount_cents: 29900,
+      amount_cents: 14900,
     };
     var btn = document.querySelector('.btn-tier[data-tier="1"]');
     if (btn) btn.disabled = true;
@@ -210,6 +210,7 @@
       .catch(function (err) {
         var msg = err.message || "Checkout failed.";
         if (msg === "Internal Server Error" || (msg.length > 0 && msg.indexOf("Internal S") === 0)) msg = "Server error. Please try again. If you run the app locally, ensure STRIPE_SECRET_KEY is set in .env.";
+        if (msg === "Failed to fetch" || /ERR_NETWORK_CHANGED|NetworkError|network/i.test(msg)) msg = "Network error. Your connection may have changed. Please check your connection and try again.";
         setFormError(msg, true);
         if (err.payment_link) showPaymentLinkFallback(err.payment_link);
       })

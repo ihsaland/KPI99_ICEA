@@ -123,7 +123,7 @@ class CheckoutTier1Request(BaseModel):
     request: AnalyzeRequest
     success_url_base: Optional[str] = None  # e.g. https://icea.example.com/report-success.html
     cancel_url: Optional[str] = None
-    amount_cents: Optional[int] = Field(29900, ge=29900, le=29900)  # $299 fixed
+    amount_cents: Optional[int] = Field(14900, ge=14900, le=14900)  # $149 LATAM-competitive
 
 
 class ExpertRequest(BaseModel):
