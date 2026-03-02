@@ -6,7 +6,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request, HTTPException, File, UploadFile, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, Response, JSONResponse
+from fastapi.responses import HTMLResponse, Response, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from icea.models import (
@@ -372,6 +372,19 @@ def checkout_tier1(body: CheckoutTier1Request, req: Request):
             content={"detail": "Could not create checkout session.", "payment_link": payment_link},
         )
     return {"checkout_url": checkout_url, "token": token}
+
+
+@app.get("/v1/pay")
+def pay_redirect(req: Request):
+    """
+    Redirect to Stripe payment link (Tier 1) if STRIPE_PAYMENT_LINK is set; otherwise redirect to app home.
+    Used by the sample report preview "Get your full report" button.
+    """
+    payment_link = (os.environ.get("STRIPE_PAYMENT_LINK") or "").strip()
+    if payment_link:
+        return RedirectResponse(url=payment_link, status_code=302)
+    base = str(req.base_url).rstrip("/")
+    return RedirectResponse(url=f"{base}/", status_code=302)
 
 
 @app.get("/v1/report-paid")
