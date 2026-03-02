@@ -379,13 +379,14 @@
     });
   }
 
-  // Demo option: visible only when backend allows demo (not in production)
+  // Demo option: visible only when backend allows demo AND host is local (never show in production)
   var demoCard = document.getElementById("demo-tier-card");
+  var isLocalHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
   fetch("/v1/health")
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (demoCard) {
-        if (data.demo_available) {
+        if (data.demo_available && isLocalHost) {
           demoCard.classList.remove("hidden");
         } else {
           demoCard.classList.add("hidden");
