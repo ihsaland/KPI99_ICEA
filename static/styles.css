@@ -18,6 +18,11 @@ body {
     overflow-x: hidden;
 }
 
+/* Utility: any element with .hidden is not displayed (e.g. demo tier card when disabled) */
+.hidden {
+    display: none !important;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
