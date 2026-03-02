@@ -8,7 +8,7 @@ try:
 except ImportError:
     pass
 
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from icea.api import app, mount_static, sample_eventlog_response
 
 # Register sample route before static mount so GET /v1/sample-eventlog is never caught by static
@@ -17,6 +17,12 @@ app.add_api_route("/v1/sample-eventlog", sample_eventlog_response, methods=["GET
 # Serve frontend from project_root/static
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 INDEX_HTML = STATIC_DIR / "index.html"
+
+# Redirect full sample report to preview so production always shows the preview
+@app.get("/sample-report.html")
+def _redirect_sample_report():
+    return RedirectResponse(url="/sample-report-preview.html", status_code=302)
+
 
 # So that icea.kpi99.co/en/ and icea.kpi99.co/es/ are accessible (same single-page app as /)
 @app.get("/en", response_class=FileResponse)
