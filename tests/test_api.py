@@ -46,6 +46,42 @@ def test_analyze_invalid(client):
     assert r.status_code == 422
 
 
+def test_analyze_from_eventlog(client):
+    """POST /v1/analyze/from-eventlog derives request from jobs and returns same shape as analyze."""
+    body = {
+        "jobs": [
+            {
+                "job_id": 0,
+                "duration_sec": 120,
+                "executor_run_time_ms": 100000,
+                "executor_hours": 0.0278,
+                "bytes_read": 0,
+                "bytes_written": 0,
+                "estimated_cost_usd": 0.5,
+                "result": "JobSucceeded",
+            },
+        ],
+        "executor_hourly_cost_usd": 0.05,
+        "source_filename": "events.json",
+    }
+    r = client.post("/v1/analyze/from-eventlog", json=body)
+    assert r.status_code == 200
+    data = r.json()
+    assert "request" in data
+    assert "response" in data
+    assert "risk_notes" in data
+    assert data["response"]["packing"]["executors_per_node"] >= 1
+    assert data["request"]["workload"]["avg_runtime_minutes"] > 0
+
+
+def test_analyze_from_eventlog_empty_jobs(client):
+    r = client.post(
+        "/v1/analyze/from-eventlog",
+        json={"jobs": [], "executor_hourly_cost_usd": 0.05},
+    )
+    assert r.status_code == 400
+
+
 def test_report_requires_auth_when_not_demo(client, monkeypatch):
     monkeypatch.delenv("ICEA_DEMO", raising=False)
     monkeypatch.delenv("ICEA_API_KEY", raising=False)

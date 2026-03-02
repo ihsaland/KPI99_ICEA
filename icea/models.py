@@ -153,3 +153,12 @@ class JobReportRequest(BaseModel):
     jobs: list[JobLevelSummary]
     executor_hourly_cost_usd: Optional[float] = None
     source_filename: Optional[str] = None
+
+
+class AnalyzeFromEventlogRequest(BaseModel):
+    """Request for POST /v1/analyze/from-eventlog: ingest result + optional node/executor overrides."""
+    jobs: list[JobLevelSummary]
+    executor_hourly_cost_usd: Optional[float] = Field(None, ge=0, description="Hourly cost per executor for cost and node default")
+    source_filename: Optional[str] = None
+    node: Optional[NodeConfig] = None
+    executor: Optional[ExecutorConfig] = None

@@ -170,18 +170,17 @@
   }
 
   // Tier 1: checkout then redirect to Stripe (or show payment link fallback if not configured)
-  function startTier1Checkout() {
+  function startTier1CheckoutWithRequest(requestPayload) {
     clearRowErrors();
-    var payload = getPayload();
     var successBase = window.location.origin + "/report-success.html";
     var body = {
-      request: payload,
+      request: requestPayload,
       success_url_base: successBase,
       cancel_url: window.location.origin + "/",
       amount_cents: 14900,
     };
-    var btn = document.querySelector('.btn-tier[data-tier="1"]');
-    if (btn) btn.disabled = true;
+    var tier1Btns = document.querySelectorAll('.btn-tier[data-tier="1"]');
+    tier1Btns.forEach(function (b) { b.disabled = true; });
     fetch("/v1/checkout/tier1", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -215,8 +214,12 @@
         if (err.payment_link) showPaymentLinkFallback(err.payment_link);
       })
       .finally(function () {
-        if (btn) btn.disabled = false;
+        tier1Btns.forEach(function (b) { b.disabled = false; });
       });
+  }
+
+  function startTier1Checkout() {
+    startTier1CheckoutWithRequest(getPayload());
   }
 
   function showPaymentLinkFallback(url) {
@@ -242,15 +245,17 @@
     el.appendChild(wrap);
   }
 
-  // Tier 2/3: open modal, submit to request-expert
+  // Tier 2/3: open modal, submit to request-expert (config from form or Path 2 analysis)
   var expertModal = document.getElementById("expert-modal");
   var expertForm = document.getElementById("expert-form");
   var expertTier = document.getElementById("expert-tier");
   var expertModalTitle = document.getElementById("expert-modal-title");
+  var expertModalConfigOverride = null;
 
-  function openExpertModal(tier) {
+  function openExpertModal(tier, configOverride) {
     expertTier.value = tier;
     expertModalTitle.textContent = tier === "3" ? "Request Enterprise Analysis" : "Request Expert Analysis";
+    expertModalConfigOverride = configOverride || null;
     if (expertModal) expertModal.classList.remove("hidden");
   }
 
@@ -268,16 +273,43 @@
   expertForm.addEventListener("submit", function (e) {
     e.preventDefault();
     var tier = expertTier.value;
+    var tierLabel = tier === "3" ? "Enterprise ($5,000+)" : "Expert ($1,500–$5,000)";
+    var name = document.getElementById("expert-name").value.trim();
+    var email = document.getElementById("expert-email").value.trim();
+    var company = document.getElementById("expert-company").value.trim();
+    var message = document.getElementById("expert-message").value.trim();
+    var config = expertModalConfigOverride || getPayload();
     var payload = {
-      name: document.getElementById("expert-name").value.trim(),
-      email: document.getElementById("expert-email").value.trim(),
-      company: document.getElementById("expert-company").value.trim() || null,
-      message: document.getElementById("expert-message").value.trim() || null,
-      config: getPayload(),
+      name: name,
+      email: email,
+      company: company || null,
+      message: message || null,
+      config: config,
       tier: tier,
     };
     var submitBtn = expertForm.querySelector('button[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
+
+    function sendEmailJSNotification() {
+      var uid = typeof window !== "undefined" && window.EMAILJS_USER_ID;
+      var sid = typeof window !== "undefined" && window.EMAILJS_SERVICE_ID;
+      var tid = typeof window !== "undefined" && window.EMAILJS_TEMPLATE_ID;
+      if (!uid || !sid || !tid || typeof emailjs === "undefined") return;
+      try {
+        emailjs.init(uid);
+        emailjs.send(sid, tid, {
+          name: name,
+          email: email,
+          company: company,
+          message: message,
+          tier: tier,
+          tier_label: tierLabel,
+          reply_to: email,
+        }).then(function () { /* sent */ }).catch(function () { /* ignore */ });
+      } catch (err) { /* ignore */ }
+    }
+    sendEmailJSNotification();
+
     fetch("/v1/request-expert", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -302,15 +334,25 @@
       });
   });
 
-  // Tier buttons
+  // Tier buttons (Path 1: form payload; Path 2: derived from event log)
   document.querySelectorAll(".btn-tier[data-tier='1']").forEach(function (btn) {
-    btn.addEventListener("click", startTier1Checkout);
+    btn.addEventListener("click", function () {
+      if (btn.getAttribute("data-path") === "2" && lastPath2AnalyzeResult && lastPath2AnalyzeResult.request) {
+        startTier1CheckoutWithRequest(lastPath2AnalyzeResult.request);
+      } else {
+        startTier1Checkout();
+      }
+    });
   });
   document.querySelectorAll(".btn-tier[data-tier='2']").forEach(function (btn) {
-    btn.addEventListener("click", function () { openExpertModal("2"); });
+    btn.addEventListener("click", function () {
+      openExpertModal("2", btn.getAttribute("data-path") === "2" && lastPath2AnalyzeResult ? lastPath2AnalyzeResult.request : null);
+    });
   });
   document.querySelectorAll(".btn-tier[data-tier='3']").forEach(function (btn) {
-    btn.addEventListener("click", function () { openExpertModal("3"); });
+    btn.addEventListener("click", function () {
+      openExpertModal("3", btn.getAttribute("data-path") === "2" && lastPath2AnalyzeResult ? lastPath2AnalyzeResult.request : null);
+    });
   });
 
   // View report (HTML): open KPI99 report in new tab with optional PDF download
@@ -379,6 +421,58 @@
     });
   }
 
+  // Path 2 demo: view report (HTML) and download PDF using analysis from event log
+  var btnViewReportPath2 = document.getElementById("btn-view-report-path2");
+  if (btnViewReportPath2) {
+    btnViewReportPath2.addEventListener("click", function () {
+      if (!lastPath2AnalyzeResult || !lastPath2AnalyzeResult.request) return;
+      setFormError("");
+      btnViewReportPath2.disabled = true;
+      fetch("/v1/report/html", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(lastPath2AnalyzeResult.request),
+      })
+        .then(function (res) {
+          if (!res.ok) return res.text().then(function (t) { throw new Error(t || res.statusText); });
+          return res.text();
+        })
+        .then(function (html) {
+          var w = window.open("", "_blank");
+          if (w) { w.document.write(html); w.document.close(); }
+          else setFormError("Allow pop-ups to view the report.");
+        })
+        .catch(function (err) { setFormError(err.message || "View report failed"); })
+        .finally(function () { btnViewReportPath2.disabled = false; });
+    });
+  }
+  var btnDemoReportPath2 = document.getElementById("btn-demo-report-path2");
+  if (btnDemoReportPath2) {
+    btnDemoReportPath2.addEventListener("click", function () {
+      if (!lastPath2AnalyzeResult || !lastPath2AnalyzeResult.request) return;
+      setFormError("");
+      btnDemoReportPath2.disabled = true;
+      fetch("/v1/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(lastPath2AnalyzeResult.request),
+      })
+        .then(function (res) {
+          if (!res.ok) return res.text().then(function (t) { throw new Error(t || res.statusText); });
+          return res.blob();
+        })
+        .then(function (blob) {
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "icea-report.pdf";
+          a.click();
+          URL.revokeObjectURL(a.href);
+        })
+        .catch(function (err) { setFormError(err.message || "Download failed"); })
+        .finally(function () { btnDemoReportPath2.disabled = false; });
+    });
+  }
+
   // Demo option: visible only when backend allows demo AND host is local (never show in production)
   var demoCard = document.getElementById("demo-tier-card");
   var isLocalHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
@@ -397,8 +491,48 @@
       if (demoCard) demoCard.classList.add("hidden");
     });
 
-  // Event log ingest and job-level PDF
+  // Event log ingest, then analyze-from-eventlog for same payment/report flow as Path 1
   var lastEventlogResult = null;
+  var lastPath2AnalyzeResult = null;
+  function runPath2AnalyzeFromIngest(data, executorHourly) {
+    return fetch("/v1/analyze/from-eventlog", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jobs: data.jobs || [],
+        executor_hourly_cost_usd: executorHourly,
+        source_filename: data.source_filename || null,
+      }),
+    }).then(function (r) {
+      if (!r.ok) return r.json().then(function (j) { throw new Error(j.detail || r.statusText); });
+      return r.json();
+    });
+  }
+  function showPath2AnalysisSection(analysis) {
+    if (!analysis) return;
+    lastPath2AnalyzeResult = analysis;
+    var el = document.getElementById("eventlog-analysis");
+    if (el) {
+      el.classList.remove("hidden");
+      var res = analysis.response || {};
+      var pack = res.packing || {};
+      var cost = res.cost || {};
+      var rec = res.recommendation || {};
+      if (document.getElementById("eventlog-preview-score")) document.getElementById("eventlog-preview-score").textContent = pack.efficiency_score != null ? pack.efficiency_score : "—";
+      if (document.getElementById("eventlog-preview-waste")) document.getElementById("eventlog-preview-waste").textContent = cost.waste_cost_monthly_usd != null ? "$" + Number(cost.waste_cost_monthly_usd).toFixed(2) : "—";
+      if (document.getElementById("eventlog-preview-executors")) document.getElementById("eventlog-preview-executors").textContent = pack.executors_per_node != null ? pack.executors_per_node : "—";
+      var savingsEl = document.getElementById("eventlog-preview-savings");
+      if (savingsEl) savingsEl.textContent = (rec.savings_vs_current_monthly_usd != null) ? "$" + Number(rec.savings_vs_current_monthly_usd).toFixed(2) : "—";
+    }
+    var demoCardPath2 = document.getElementById("demo-tier-card-path2");
+    if (demoCardPath2) {
+      fetch("/v1/health").then(function (r) { return r.json(); }).then(function (d) {
+        var isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        if (d.demo_available && isLocal) demoCardPath2.classList.remove("hidden");
+        else demoCardPath2.classList.add("hidden");
+      }).catch(function () { if (demoCardPath2) demoCardPath2.classList.add("hidden"); });
+    }
+  }
   var eventlogForm = document.getElementById("eventlog-form");
   var eventlogResult = document.getElementById("eventlog-result");
   var eventlogError = document.getElementById("eventlog-error");
@@ -430,7 +564,11 @@
             document.getElementById("eventlog-total-cost").textContent = (data.total_estimated_cost_usd != null) ? "$" + Number(data.total_estimated_cost_usd).toFixed(2) : "—";
             eventlogResult.classList.remove("hidden");
           }
+          var hourlyInput = document.getElementById("eventlog-executor-hourly");
+          var executorHourly = (hourlyInput && hourlyInput.value) ? parseFloat(hourlyInput.value) : null;
+          return runPath2AnalyzeFromIngest(data, executorHourly);
         })
+        .then(showPath2AnalysisSection)
         .catch(function (err) {
           if (eventlogError) { eventlogError.textContent = err.message || "Ingest failed"; eventlogError.classList.remove("hidden"); }
         })
@@ -471,6 +609,207 @@
         })
         .finally(function () { if (btn) btn.disabled = false; });
     });
+  }
+  var eventlogPdfBtn = document.getElementById("eventlog-download-pdf");
+  if (eventlogPdfBtn) {
+    eventlogPdfBtn.addEventListener("click", function () {
+      if (!lastEventlogResult || !lastEventlogResult.jobs || !lastEventlogResult.jobs.length) return;
+      var hourlyInput = document.getElementById("eventlog-executor-hourly");
+      var executorHourly = (hourlyInput && hourlyInput.value) ? parseFloat(hourlyInput.value) : null;
+      fetch("/v1/report/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobs: lastEventlogResult.jobs,
+          executor_hourly_cost_usd: executorHourly,
+          source_filename: lastEventlogResult.source_filename || "",
+        }),
+      })
+        .then(function (res) {
+          if (!res.ok) return res.text().then(function (t) { throw new Error(t || res.statusText); });
+          return res.blob();
+        })
+        .then(function (blob) {
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "icea-job-report.pdf";
+          a.click();
+          URL.revokeObjectURL(a.href);
+        })
+        .catch(function (err) { if (eventlogError) { eventlogError.textContent = err.message || "PDF failed"; eventlogError.classList.remove("hidden"); } });
+    });
+  }
+
+  var API_BASE = "";
+
+  var CLOUD_FALLBACK_HTML = "<option value=\"aws\">AWS</option><option value=\"azure\">Azure</option><option value=\"gcp\">GCP</option><option value=\"oci\">Oracle Cloud</option><option value=\"alibaba\">Alibaba</option><option value=\"ibm\">IBM</option><option value=\"digitalocean\">DigitalOcean</option><option value=\"linode\">Linode</option><option value=\"databricks\">Databricks</option><option value=\"emr\">AWS EMR</option><option value=\"synapse\">Azure Synapse</option><option value=\"dataproc\">Google Dataproc</option><option value=\"on-prem\">On-prem</option>";
+
+  var FALLBACK_REGIONS = { aws: [{ id: "us-east-1", name: "US East (N. Virginia)" }, { id: "us-west-2", name: "US West (Oregon)" }, { id: "eu-west-1", name: "EU (Ireland)" }], azure: [{ id: "eastus", name: "East US" }, { id: "westeurope", name: "West Europe" }], gcp: [{ id: "us-central1", name: "us-central1 (Iowa)" }, { id: "europe-west1", name: "europe-west1 (Belgium)" }], emr: [{ id: "us-east-1", name: "US East" }, { id: "us-west-2", name: "US West" }], synapse: [{ id: "eastus", name: "East US" }, { id: "westeurope", name: "West Europe" }], dataproc: [{ id: "us-central1", name: "us-central1" }, { id: "europe-west1", name: "europe-west1" }] };
+  var FALLBACK_INSTANCES = { aws: [{ id: "r6g.4xlarge", name: "r6g.4xlarge", cores: 16, memory_gb: 128, hourly_usd: 0.8064 }, { id: "m6i.4xlarge", name: "m6i.4xlarge", cores: 16, memory_gb: 64, hourly_usd: 0.768 }], azure: [{ id: "Standard_D16s_v3", name: "Standard D16s v3", cores: 16, memory_gb: 64, hourly_usd: 0.768 }, { id: "Standard_E16s_v3", name: "Standard E16s v3", cores: 16, memory_gb: 128, hourly_usd: 1.008 }], gcp: [{ id: "n2-standard-16", name: "n2-standard-16", cores: 16, memory_gb: 64, hourly_usd: 0.7769 }, { id: "n2-highmem-16", name: "n2-highmem-16", cores: 16, memory_gb: 128, hourly_usd: 1.0481 }], emr: [{ id: "m6i.4xlarge", name: "m6i.4xlarge", cores: 16, memory_gb: 64, hourly_usd: 1.008 }, { id: "r6g.4xlarge", name: "r6g.4xlarge", cores: 16, memory_gb: 128, hourly_usd: 1.128 }], synapse: [{ id: "Large", name: "Large (16 vCores)", cores: 16, memory_gb: 128, hourly_usd: 1.52 }], dataproc: [{ id: "n2-standard-16", name: "n2-standard-16", cores: 16, memory_gb: 64, hourly_usd: 0.777 }], "on-prem": [{ id: "custom", name: "Custom (enter specs below)", cores: 16, memory_gb: 64, hourly_usd: 0 }] };
+
+  function setCloudFallbackAndLoadFirst() {
+    var cloud = document.getElementById("cloud");
+    if (cloud) {
+      cloud.innerHTML = CLOUD_FALLBACK_HTML;
+      cloud.value = "aws";
+      loadRegions("aws");
+      loadInstances("aws", null);
+    }
+  }
+
+  function loadProviders() {
+    var cloud = document.getElementById("cloud");
+    if (!cloud) return;
+    fetch(API_BASE + "/v1/catalog/providers")
+      .then(function (r) {
+        if (!r.ok) return null;
+        return r.json();
+      })
+      .then(function (list) {
+        if (!Array.isArray(list) || list.length === 0) {
+          setCloudFallbackAndLoadFirst();
+          return;
+        }
+        cloud.innerHTML = "";
+        list.forEach(function (p) {
+          var opt = document.createElement("option");
+          opt.value = p.id;
+          opt.textContent = p.name;
+          cloud.appendChild(opt);
+        });
+        cloud.value = list[0].id;
+        loadRegions(list[0].id);
+        loadInstances(list[0].id, null);
+      })
+      .catch(function () {
+        setCloudFallbackAndLoadFirst();
+      });
+  }
+
+  function applyRegionsToList(regionEl, list) {
+    if (!Array.isArray(list) || list.length === 0) return;
+    list.forEach(function (r) {
+      var opt = document.createElement("option");
+      opt.value = r.id;
+      opt.textContent = r.name;
+      regionEl.appendChild(opt);
+    });
+  }
+
+  function applyInstancesToList(instSelect, list) {
+    if (!Array.isArray(list) || list.length === 0) return;
+    catalogInstances = list;
+    list.forEach(function (i) {
+      var opt = document.createElement("option");
+      opt.value = i.id;
+      opt.textContent = i.name + " — " + i.cores + " vCPU, " + i.memory_gb + " GB — $" + i.hourly_usd + "/hr";
+      instSelect.appendChild(opt);
+    });
+  }
+
+  function loadRegions(cloud) {
+    var regionEl = document.getElementById("region");
+    if (!regionEl) return;
+    regionEl.innerHTML = "<option value=\"\">— Select region —</option>";
+    if (!cloud) return;
+    fetch(API_BASE + "/v1/catalog/regions?cloud=" + encodeURIComponent(cloud))
+      .then(function (r) {
+        if (!r.ok) return null;
+        return r.json();
+      })
+      .then(function (list) {
+        if (Array.isArray(list) && list.length > 0) {
+          applyRegionsToList(regionEl, list);
+          return;
+        }
+        var fallback = FALLBACK_REGIONS[cloud];
+        if (fallback) applyRegionsToList(regionEl, fallback);
+      })
+      .catch(function () {
+        var fallback = FALLBACK_REGIONS[cloud];
+        if (fallback) applyRegionsToList(regionEl, fallback);
+      });
+  }
+
+  function loadInstances(cloud, region) {
+    var instSelect = document.getElementById("instance_type");
+    if (!instSelect) return;
+    instSelect.innerHTML = "<option value=\"\">— Select instance type —</option>";
+    catalogInstances = [];
+    if (!cloud) return;
+    var url = API_BASE + "/v1/catalog/instances?cloud=" + encodeURIComponent(cloud);
+    if (region) url += "&region=" + encodeURIComponent(region);
+    fetch(url)
+      .then(function (r) {
+        if (!r.ok) return null;
+        return r.json();
+      })
+      .then(function (list) {
+        if (Array.isArray(list) && list.length > 0) {
+          applyInstancesToList(instSelect, list);
+          return;
+        }
+        var fallback = FALLBACK_INSTANCES[cloud];
+        if (fallback) applyInstancesToList(instSelect, fallback);
+      })
+      .catch(function () {
+        var fallback = FALLBACK_INSTANCES[cloud];
+        if (fallback) applyInstancesToList(instSelect, fallback);
+      });
+  }
+
+  function onInstanceTypeChange() {
+    var instSelect = document.getElementById("instance_type");
+    var id = instSelect && instSelect.value;
+    if (!id) return;
+    var inst = catalogInstances.find(function (i) { return i.id === id; });
+    if (!inst) return;
+    var cores = document.getElementById("node_cores");
+    var mem = document.getElementById("node_memory_gb");
+    var cost = document.getElementById("node_hourly_cost_usd");
+    if (cores) cores.value = inst.cores;
+    if (mem) mem.value = inst.memory_gb;
+    if (cost) cost.value = inst.hourly_usd;
+    analyze();
+  }
+
+  if (document.getElementById("cloud")) {
+    document.getElementById("cloud").addEventListener("change", function () {
+      var cloud = this.value;
+      loadRegions(cloud);
+      loadInstances(cloud, null);
+    });
+  }
+  if (document.getElementById("region")) {
+    document.getElementById("region").addEventListener("change", function () {
+      var cloud = document.getElementById("cloud") && document.getElementById("cloud").value;
+      var region = this.value || null;
+      loadInstances(cloud, region);
+    });
+  }
+  if (document.getElementById("instance_type")) {
+    document.getElementById("instance_type").addEventListener("change", onInstanceTypeChange);
+  }
+
+  if (form) {
+    form.addEventListener("input", function () {
+      clearTimeout(window._previewTimeout);
+      window._previewTimeout = setTimeout(analyze, 400);
+    });
+    form.addEventListener("change", function () {
+      clearTimeout(window._previewTimeout);
+      window._previewTimeout = setTimeout(analyze, 400);
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+      loadProviders();
+      setTimeout(analyze, 500);
+    });
+  } else {
+    loadProviders();
+    setTimeout(analyze, 500);
   }
   var eventlogPdfBtn = document.getElementById("eventlog-download-pdf");
   if (eventlogPdfBtn) {

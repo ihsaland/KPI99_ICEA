@@ -815,6 +815,29 @@ textarea {
     display: none !important;
 }
 
+.eventlog-analysis {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+.eventlog-analysis.hidden {
+    display: none !important;
+}
+.eventlog-analysis__title {
+    font-size: 1.1rem;
+    color: #1e3a8a;
+    margin: 0 0 1rem 0;
+}
+.eventlog-preview .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+.eventlog-tier-cards {
+    margin-top: 1rem;
+}
+
 .eventlog-result__summary {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -855,27 +878,28 @@ textarea {
     }
 }
 
-/* Footer — KPI99 format */
+/* Footer — KPI99 format (match kpi99.co) */
 footer {
     background: #0f172a;
     color: white;
     padding: 40px 0;
     margin-top: auto;
+    text-align: center;
 }
 
 footer .container {
     text-align: center;
 }
 
-footer .footer-tagline {
-    margin-bottom: 12px;
-    font-style: italic;
-    opacity: 0.9;
+footer p {
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 footer p:last-child {
+    margin-bottom: 0;
     font-size: 0.9rem;
-    opacity: 0.85;
+    opacity: 0.9;
 }
 
 /* Errors */

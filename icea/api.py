@@ -12,13 +12,17 @@ from fastapi.staticfiles import StaticFiles
 from icea.models import (
     AnalyzeRequest,
     AnalyzeResponse,
+    AnalyzeFromEventlogRequest,
     Assumptions,
     CheckoutTier1Request,
+    ExecutorConfig,
     ExpertRequest,
     JobLevelSummary,
     JobReportRequest,
+    NodeConfig,
     PackingResult,
     CostResult,
+    WorkloadConfig,
 )
 from icea.packing import compute_packing
 from icea.cost_model import compute_cost
@@ -158,6 +162,33 @@ def _risk_notes(req: AnalyzeRequest, packing: PackingResult) -> list[str]:
             "Expect higher interrupt risk and possible cost variance."
         )
     return notes
+
+
+def _analyze_request_from_eventlog(body: AnalyzeFromEventlogRequest) -> AnalyzeRequest:
+    """Build AnalyzeRequest from event log ingest result; use defaults for node/executor if not provided."""
+    jobs = body.jobs or []
+    if not jobs:
+        raise ValueError("At least one job is required from the event log.")
+    # Derive workload from jobs
+    total_executor_hours = sum(j.executor_hours for j in jobs)
+    durations = [j.duration_sec for j in jobs if j.duration_sec > 0]
+    avg_runtime_minutes = (sum(durations) / len(durations) / 60.0) if durations else 10.0
+    avg_runtime_minutes = max(0.1, min(1440, avg_runtime_minutes))
+    # Assume log represents ~30 days for jobs_per_day
+    jobs_per_day = max(0.1, min(100000, len(jobs) / 30.0))
+    workload = WorkloadConfig(avg_runtime_minutes=round(avg_runtime_minutes, 2), jobs_per_day=round(jobs_per_day, 2))
+    # Default node: 8 cores, 32 GB; hourly from executor_hourly * 4 or 0.20
+    executor_hourly = body.executor_hourly_cost_usd if body.executor_hourly_cost_usd is not None and body.executor_hourly_cost_usd >= 0 else 0.05
+    node_hourly = executor_hourly * 4 if executor_hourly else 0.20
+    node = body.node or NodeConfig(cores=8, memory_gb=32, hourly_cost_usd=round(node_hourly, 4), count=1)
+    executor = body.executor or ExecutorConfig(cores=4, memory_gb=16)
+    return AnalyzeRequest(
+        cloud="aws",
+        node=node,
+        executor=executor,
+        workload=workload,
+        assumptions=Assumptions(),
+    )
 
 
 def _demo_available() -> bool:
@@ -520,6 +551,29 @@ def request_expert(body: ExpertRequest):
         "tier": body.tier,
         "tier_label": tier_label,
         "request_id": request_id,
+    }
+
+
+@app.post("/v1/analyze/from-eventlog")
+def analyze_from_eventlog(body: AnalyzeFromEventlogRequest):
+    """
+    Derive cluster/workload from event log ingest result and run the same analysis as Path 1.
+    Returns the AnalyzeRequest (for checkout/report) and AnalyzeResponse (for preview). Path 2 uses this
+    so both paths lead to payment and the full ICEA report.
+    """
+    try:
+        request = _analyze_request_from_eventlog(body)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    try:
+        result = run_sync_with_timeout(get_analyze_timeout_sec(), _do_analyze, request)
+    except TimeoutError:
+        raise HTTPException(status_code=504, detail="Analysis timed out. Try again or reduce input size.")
+    risk = _risk_notes(request, result.packing)
+    return {
+        "request": request.model_dump(),
+        "response": result.model_dump(),
+        "risk_notes": risk,
     }
 
 
