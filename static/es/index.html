@@ -303,7 +303,7 @@
                                     <span id="preview-score" class="preview-value">—</span>
                                 </div>
                                 <div class="preview-item">
-                                    <span class="preview-label">Desperdicio mensual est.</span>
+                                    <span class="preview-label">Desperdicio mensual est. (USD)</span>
                                     <span id="preview-waste" class="preview-value">—</span>
                                 </div>
                                 <div class="preview-item">
@@ -311,7 +311,7 @@
                                     <span id="preview-executors" class="preview-value">—</span>
                                 </div>
                                 <div class="preview-item" id="preview-savings-wrap">
-                                    <span class="preview-label">Ahorro proyectado (vs actual)</span>
+                                    <span class="preview-label">Ahorro proyectado (vs actual, USD)</span>
                                     <span id="preview-savings" class="preview-value">—</span>
                                 </div>
                             </div>
@@ -329,17 +329,17 @@
                             <div class="tier-cards tier-cards--stack">
                                 <div class="tier-card" data-tier="1">
                                     <h3>Tier 1 — Informe</h3>
-                                    <p class="tier-price">$149 <span>por análisis</span></p>
+                                    <p class="tier-price">$149 <span>USD por análisis</span></p>
                                     <button type="button" class="btn btn-tier btn-primary" data-tier="1">Pagar y obtener informe</button>
                                 </div>
                                 <div class="tier-card" data-tier="2">
                                     <h3>Tier 2 — Experto</h3>
-                                    <p class="tier-price">$1,500–$5,000</p>
+                                    <p class="tier-price">$1,500–$5,000 USD</p>
                                     <button type="button" class="btn btn-tier btn-secondary" data-tier="2">Solicitar experto</button>
                                 </div>
                                 <div class="tier-card" data-tier="3">
                                     <h3>Tier 3 — Empresa</h3>
-                                    <p class="tier-price">$5,000+</p>
+                                    <p class="tier-price">$5,000+ USD</p>
                                     <button type="button" class="btn btn-tier btn-secondary" data-tier="3">Solicitar empresa</button>
                                 </div>
                                 <div id="demo-tier-card" class="tier-card tier-card-demo hidden">
@@ -374,7 +374,11 @@
                         <div class="eventlog-form__fields">
                             <div class="row">
                                 <label for="eventlog-file">Archivo de registro de eventos</label>
-                                <input type="file" id="eventlog-file" name="file" accept=".json,.gz,application/json,application/gzip">
+                                <div class="file-picker">
+                                    <input type="file" id="eventlog-file" name="file" class="file-picker__input" accept=".json,.gz,application/json,application/gzip">
+                                    <button type="button" class="btn btn-secondary file-picker__btn" id="eventlog-file-btn">Elegir archivo</button>
+                                    <span class="file-picker__name" id="eventlog-file-name">Ningún archivo seleccionado</span>
+                                </div>
                             </div>
                             <div class="row">
                                 <label for="eventlog-executor-hourly">Costo horario por ejecutor (USD) <span class="optional">opcional, para columna de costo</span></label>
@@ -398,7 +402,7 @@
                                 <span id="eventlog-total-hrs" class="eventlog-result__value">0</span>
                             </div>
                             <div class="eventlog-result__stat">
-                                <span class="eventlog-result__label">Costo est.</span>
+                                <span class="eventlog-result__label">Costo est. (USD)</span>
                                 <span id="eventlog-total-cost" class="eventlog-result__value">—</span>
                             </div>
                         </div>
@@ -412,7 +416,7 @@
                                         <span id="eventlog-preview-score" class="preview-value">—</span>
                                     </div>
                                     <div class="preview-item">
-                                        <span class="preview-label">Desperdicio mensual est.</span>
+                                        <span class="preview-label">Desperdicio mensual est. (USD)</span>
                                         <span id="eventlog-preview-waste" class="preview-value">—</span>
                                     </div>
                                     <div class="preview-item">
@@ -420,7 +424,7 @@
                                         <span id="eventlog-preview-executors" class="preview-value">—</span>
                                     </div>
                                     <div class="preview-item">
-                                        <span class="preview-label">Ahorro proyectado (vs actual)</span>
+                                        <span class="preview-label">Ahorro proyectado (vs actual, USD)</span>
                                         <span id="eventlog-preview-savings" class="preview-value">—</span>
                                     </div>
                                 </div>
@@ -428,17 +432,17 @@
                             <div class="eventlog-tier-cards tier-cards tier-cards--stack">
                                 <div class="tier-card" data-tier="1" data-path="2">
                                     <h3>Tier 1 — Informe</h3>
-                                    <p class="tier-price">$149 <span>por análisis</span></p>
+                                    <p class="tier-price">$149 <span>USD por análisis</span></p>
                                     <button type="button" class="btn btn-tier btn-primary" data-tier="1" data-path="2">Pagar y obtener informe</button>
                                 </div>
                                 <div class="tier-card" data-tier="2" data-path="2">
                                     <h3>Tier 2 — Experto</h3>
-                                    <p class="tier-price">$1,500–$5,000</p>
+                                    <p class="tier-price">$1,500–$5,000 USD</p>
                                     <button type="button" class="btn btn-tier btn-secondary" data-tier="2" data-path="2">Solicitar experto</button>
                                 </div>
                                 <div class="tier-card" data-tier="3" data-path="2">
                                     <h3>Tier 3 — Empresa</h3>
-                                    <p class="tier-price">$5,000+</p>
+                                    <p class="tier-price">$5,000+ USD</p>
                                     <button type="button" class="btn btn-tier btn-secondary" data-tier="3" data-path="2">Solicitar empresa</button>
                                 </div>
                                 <div id="demo-tier-card-path2" class="tier-card tier-card-demo hidden">

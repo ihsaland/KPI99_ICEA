@@ -549,12 +549,28 @@
   var eventlogForm = document.getElementById("eventlog-form");
   var eventlogResult = document.getElementById("eventlog-result");
   var eventlogError = document.getElementById("eventlog-error");
+  var eventlogFileBtn = document.getElementById("eventlog-file-btn");
+  var eventlogFileName = document.getElementById("eventlog-file-name");
+  var eventlogFileInput = document.getElementById("eventlog-file");
+  if (eventlogFileBtn && eventlogFileInput) {
+    eventlogFileBtn.addEventListener("click", function () { eventlogFileInput.click(); });
+  }
+  if (eventlogFileInput && eventlogFileName) {
+    eventlogFileInput.addEventListener("change", function () {
+      var f = eventlogFileInput.files && eventlogFileInput.files[0];
+      eventlogFileName.textContent = f ? f.name : ((window.ICEA_LANG || "").toLowerCase() === "es" ? "Ningún archivo seleccionado" : "No file selected");
+    });
+  }
   if (eventlogForm) {
     eventlogForm.addEventListener("submit", function (e) {
       e.preventDefault();
       var fileInput = document.getElementById("eventlog-file");
       if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-        if (eventlogError) { eventlogError.textContent = "Select a file."; eventlogError.classList.remove("hidden"); }
+        if (eventlogError) {
+          var isEs = (window.ICEA_LANG || "").toLowerCase() === "es";
+          eventlogError.textContent = isEs ? "Seleccione un archivo." : "Select a file.";
+          eventlogError.classList.remove("hidden");
+        }
         return;
       }
       var fd = new FormData();

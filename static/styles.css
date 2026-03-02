@@ -433,6 +433,30 @@ nav .nav-lang:hover {
     gap: 1rem;
 }
 
+/* File picker (custom button so label can be localized) */
+.file-picker {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.file-picker__input {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+.file-picker__btn {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+}
+.file-picker__name {
+    font-size: 0.9rem;
+    color: #64748b;
+    word-break: break-word;
+}
+
 @media (max-width: 520px) {
     .row.two-cols {
         grid-template-columns: 1fr;
