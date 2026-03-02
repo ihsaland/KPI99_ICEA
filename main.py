@@ -8,7 +8,7 @@ try:
 except ImportError:
     pass
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from icea.api import app, mount_static, sample_eventlog_response
 
@@ -37,9 +37,22 @@ def _redirect_sample_report():
     return RedirectResponse(url="/sample-report-preview.html", status_code=302)
 
 
-# Root: support ?lang=es / ?lang=en so language is consistent when path is rewritten (e.g. by proxy)
+def _prefer_spanish_from_request(request: Request) -> bool:
+    """True if we should serve Spanish: referrer from /es/ or Accept-Language prefers es."""
+    referer = (request.headers.get("referer") or request.headers.get("referrer") or "").strip()
+    if referer and "/es" in referer and ("/es/" in referer or referer.endswith("/es")):
+        return True
+    accept_lang = (request.headers.get("accept-language") or "").strip()
+    if not accept_lang:
+        return False
+    # First listed language (e.g. "es,en;q=0.9" or "es-419,es;q=0.9")
+    first = accept_lang.split(",")[0].strip().split(";")[0].strip().lower()
+    return first == "es" or first.startswith("es-")
+
+
+# Root: support ?lang=es / ?lang=en; redirect to /es/ when coming from Spanish context (kpi99.co/es/ or browser Spanish)
 @app.get("/")
-def _serve_root(lang: str | None = None):
+def _serve_root(request: Request, lang: str | None = None):
     if lang == "es":
         path = STATIC_DIR / "es" / "index.html"
         if path.is_file():
@@ -48,6 +61,11 @@ def _serve_root(lang: str | None = None):
         path = STATIC_DIR / "en" / "index.html"
         if path.is_file():
             return FileResponse(path)
+    # No ?lang=: redirect to /es/ if referrer is Spanish page or browser prefers Spanish
+    if lang is None and _prefer_spanish_from_request(request):
+        path = STATIC_DIR / "es" / "index.html"
+        if path.is_file():
+            return RedirectResponse(url="/es/", status_code=302)
     if INDEX_HTML.is_file():
         return FileResponse(INDEX_HTML)
     raise HTTPException(status_code=404, detail="Not found")
