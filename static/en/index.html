@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MKZ889ZT');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>ICEA — Infrastructure Cost & Efficiency Analyzer | KPI99</title>
+
+    <!-- Favicon (KPI99) -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png?v=2">
+    <link rel="shortcut icon" type="image/png" href="/favicon.png?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png?v=2">
+    <link rel="icon" type="image/png" href="/favicon.png?v=2">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+
+    <!-- Google Fonts - Manrope (KPI99) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Google tag (gtag.js) - GA4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7MQY2WJ67"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-M7MQY2WJ67');
+    </script>
+    <!-- Google tag (gtag.js) - Google Ads -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17859706167"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'AW-17859706167');
+    </script>
+
+    <link rel="stylesheet" href="/styles.css">
+    <script>window.ICEA_LANG = 'en';</script>
+</head>
+<body>
+    <!-- Navigation (KPI99 format) -->
+    <nav id="mainNav">
+        <div class="container">
+            <div class="nav-inner">
+                <a href="https://kpi99.co/en/" class="logo" target="_blank" rel="noopener noreferrer"><img src="/menu_logo.png" alt="KPI99"></a>
+                <a href="/es/" class="nav-lang" rel="alternate" hreflang="es">Español</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header / Hero (KPI99 format) -->
+    <header class="hero">
+        <div class="container">
+            <h1>Infrastructure Cost & Efficiency Analyzer</h1>
+            <p class="tagline">Identify waste, optimize executor packing, and get a shareable PDF report for Spark workloads.</p>
+        </div>
+    </header>
+
+    <main>
+        <section class="content-section">
+            <div class="container">
+                <p class="intro">Both paths produce the same full ICEA report and payment flow. Enter data manually (Path 1) or upload a Spark event log (Path 2); then review the analysis, choose a tier, and get your report.</p>
+
+                <div class="path path-overview">
+                    <div class="path__header">
+                        <span class="path__badge path__badge--overview">Overview</span>
+                        <h2 class="path__title">Two ways to analyze</h2>
+                        <p class="path__desc">Manual entry (Path 1) or event log upload (Path 2). Either way you get a preview, tier choice, and the full ICEA report after payment.</p>
+                    </div>
+                    <ul class="instructions-list instructions-list--paths">
+                        <li class="instructions-step"><a href="#path-1" class="instructions-link">Path 1 — Manual entry</a>: Configure cluster and workload in the form → see live preview → choose tier → pay and get report (or request expert).</li>
+                        <li class="instructions-step"><a href="#path-2" class="instructions-link">Path 2 — From event log</a>: Upload a Spark event log (.json or .json.gz) → we derive workload from the log → same preview, tier choice, and full report after payment.</li>
+                    </ul>
+                </div>
+
+                <div class="page-layout" id="path-1">
+                    <div class="page-layout__main">
+                <div class="path path-1">
+                    <div class="path__header">
+                        <span class="path__badge">Path 1</span>
+                        <h2 class="path__title">Manual entry — sizing & cost</h2>
+                        <p class="path__desc">Enter cluster and workload below. Use the live preview and tier cards to pay for the report or request expert analysis.</p>
+                    </div>
+                <div class="form-block">
+                <form id="icea-form" class="form card">
+                    <div id="form-error" class="error-message hidden" role="alert"></div>
+                    <h2>Environment</h2>
+                    <div class="row">
+                        <label for="cloud">Cloud</label>
+                        <select id="cloud" name="cloud">
+                            <option value="">Loading…</option>
+                        </select>
+                    </div>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="region">Region <span class="optional">optional</span></label>
+                            <select id="region" name="region">
+                                <option value="">— Select region —</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="instance_type">Instance type <span class="optional">optional</span></label>
+                            <select id="instance_type" name="instance_type">
+                                <option value="">— Select instance type —</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="node_cores">Node vCPUs</label>
+                            <input type="number" id="node_cores" name="node_cores" min="1" max="256" value="16" required>
+                        </div>
+                        <div>
+                            <label for="node_memory_gb">Node memory (GB)</label>
+                            <input type="number" id="node_memory_gb" name="node_memory_gb" min="1" step="1" value="64" required>
+                        </div>
+                    </div>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="node_hourly_cost_usd">Node hourly cost (USD)</label>
+                            <input type="number" id="node_hourly_cost_usd" name="node_hourly_cost_usd" min="0" step="0.01" value="0.92" required>
+                        </div>
+                        <div>
+                            <label for="node_count">Node count</label>
+                            <input type="number" id="node_count" name="node_count" min="1" value="10" required>
+                        </div>
+                    </div>
+
+                    <h2>Executors</h2>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="executor_cores">Executor cores</label>
+                            <input type="number" id="executor_cores" name="executor_cores" min="1" max="32" value="4" required>
+                        </div>
+                        <div>
+                            <label for="executor_memory_gb">Executor memory (GB)</label>
+                            <input type="number" id="executor_memory_gb" name="executor_memory_gb" min="1" step="1" value="16" required>
+                        </div>
+                    </div>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="reserve_cores">Reserve cores (overhead)</label>
+                            <input type="number" id="reserve_cores" name="reserve_cores" min="0" value="1">
+                        </div>
+                        <div>
+                            <label for="reserve_memory_gb">Reserve memory (GB)</label>
+                            <input type="number" id="reserve_memory_gb" name="reserve_memory_gb" min="0" step="1" value="4">
+                        </div>
+                    </div>
+
+                    <h2>Workload</h2>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="avg_runtime_minutes">Avg runtime (minutes)</label>
+                            <input type="number" id="avg_runtime_minutes" name="avg_runtime_minutes" min="0.1" step="0.1" value="18" required>
+                        </div>
+                        <div>
+                            <label for="jobs_per_day">Jobs per day</label>
+                            <input type="number" id="jobs_per_day" name="jobs_per_day" min="0.1" step="1" value="40" required>
+                        </div>
+                    </div>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="min_runtime_minutes">Min runtime (min) <span class="optional">optional</span></label>
+                            <input type="number" id="min_runtime_minutes" name="min_runtime_minutes" min="0" step="0.1" placeholder="—">
+                        </div>
+                        <div>
+                            <label for="max_runtime_minutes">Max runtime (min) <span class="optional">optional</span></label>
+                            <input type="number" id="max_runtime_minutes" name="max_runtime_minutes" min="0" step="0.1" placeholder="—">
+                        </div>
+                    </div>
+
+                    <details class="optional-metrics-block" id="optional-metrics-details">
+                    <summary class="optional-metrics-heading">Optional metrics (no log required)</summary>
+                    <p class="optional-metrics-desc">Improve risk notes. From Spark UI or estimates.</p>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="partition_count">Partition count</label>
+                            <input type="number" id="partition_count" name="partition_count" min="1" step="1" placeholder="e.g. 200, 2000">
+                        </div>
+                        <div>
+                            <label for="input_data_gb">Input data per job (GB)</label>
+                            <input type="number" id="input_data_gb" name="input_data_gb" min="0.01" step="0.1" placeholder="e.g. 50, 500">
+                        </div>
+                    </div>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="concurrent_jobs">Concurrent jobs</label>
+                            <input type="number" id="concurrent_jobs" name="concurrent_jobs" min="0.1" step="1" placeholder="e.g. 2, 10">
+                        </div>
+                        <div>
+                            <label for="peak_executor_memory_gb">Peak executor memory (GB)</label>
+                            <input type="number" id="peak_executor_memory_gb" name="peak_executor_memory_gb" min="0.5" step="0.5" placeholder="from Spark UI">
+                        </div>
+                    </div>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="shuffle_read_mb">Shuffle read (MB)</label>
+                            <input type="number" id="shuffle_read_mb" name="shuffle_read_mb" min="0" step="1" placeholder="per job">
+                        </div>
+                        <div>
+                            <label for="shuffle_write_mb">Shuffle write (MB)</label>
+                            <input type="number" id="shuffle_write_mb" name="shuffle_write_mb" min="0" step="1" placeholder="per job">
+                        </div>
+                    </div>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="data_skew">Data skew</label>
+                            <select id="data_skew" name="data_skew">
+                                <option value="">—</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="spot_pct">Spot / preemptible (%)</label>
+                            <input type="number" id="spot_pct" name="spot_pct" min="0" max="100" step="1" placeholder="0–100">
+                        </div>
+                    </div>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="autoscale_min_nodes">Autoscale min nodes</label>
+                            <input type="number" id="autoscale_min_nodes" name="autoscale_min_nodes" min="1" step="1" placeholder="—">
+                        </div>
+                        <div>
+                            <label for="autoscale_max_nodes">Autoscale max nodes</label>
+                            <input type="number" id="autoscale_max_nodes" name="autoscale_max_nodes" min="1" step="1" placeholder="—">
+                        </div>
+                    </div>
+                    </details>
+
+                    <h2>Forecast <span class="optional">optional</span></h2>
+                    <div class="row two-cols">
+                        <div>
+                            <label for="utilization_factor">Utilization factor (0–1) <span class="optional">shared cluster</span></label>
+                            <input type="number" id="utilization_factor" name="utilization_factor" min="0.01" max="1" step="0.05" placeholder="1 = dedicated">
+                        </div>
+                        <div>
+                            <label for="forecast_months">Forecast months</label>
+                            <input type="number" id="forecast_months" name="forecast_months" min="0" max="36" value="0" placeholder="0 = off">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label for="growth_rate_pct">Annual growth rate (%) <span class="optional">for forecast</span></label>
+                        <input type="number" id="growth_rate_pct" name="growth_rate_pct" step="0.5" placeholder="e.g. 20">
+                    </div>
+
+                </form>
+                </div>
+                </div>
+                <!-- end path path-1 -->
+
+                <!-- Modal: Tier 2/3 contact form -->
+                <div id="expert-modal" class="modal hidden">
+                    <div class="modal-backdrop"></div>
+                    <div class="modal-content">
+                        <h3 id="expert-modal-title">Request Expert Analysis</h3>
+                        <form id="expert-form">
+                            <input type="hidden" id="expert-tier" name="tier" value="2">
+                            <div class="row">
+                                <label for="expert-name">Name</label>
+                                <input type="text" id="expert-name" name="name" required>
+                            </div>
+                            <div class="row">
+                                <label for="expert-email">Email</label>
+                                <input type="email" id="expert-email" name="email" required>
+                            </div>
+                            <div class="row">
+                                <label for="expert-company">Company</label>
+                                <input type="text" id="expert-company" name="company" required>
+                            </div>
+                            <div class="row">
+                                <label for="expert-message">Message</label>
+                                <textarea id="expert-message" name="message" rows="3" required></textarea>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" class="btn btn-secondary" id="expert-modal-cancel">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Submit request</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                </div>
+                <!-- end page-layout__main -->
+                <aside class="page-layout__sidebar">
+                    <div class="sidebar__stack">
+                        <section id="preview" class="card preview preview--sidebar hidden">
+                            <h2>Live preview</h2>
+                            <div class="preview-grid">
+                                <div class="preview-item">
+                                    <span class="preview-label">Efficiency score</span>
+                                    <span id="preview-score" class="preview-value">—</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">Est. monthly waste</span>
+                                    <span id="preview-waste" class="preview-value">—</span>
+                                </div>
+                                <div class="preview-item">
+                                    <span class="preview-label">Executors per node</span>
+                                    <span id="preview-executors" class="preview-value">—</span>
+                                </div>
+                                <div class="preview-item" id="preview-savings-wrap">
+                                    <span class="preview-label">Projected savings (vs current)</span>
+                                    <span id="preview-savings" class="preview-value">—</span>
+                                </div>
+                            </div>
+                            <div id="preview-risks" class="risk-notes hidden"></div>
+                        </section>
+                        <section class="report-value card">
+                            <h2>What's in the Tier 1 report</h2>
+                            <p class="report-value__desc">Your report includes an efficiency score, estimated waste, executor packing recommendation, cost breakdown, methodology notes, and next steps. Use it to justify sizing decisions and spot cost savings.</p>
+                            <p class="report-value__sample">
+                                <a href="sample-report-preview.html" target="_blank" rel="noopener noreferrer" class="report-value__link">View sample report</a>
+                            </p>
+                        </section>
+                        <section class="pricing card pricing--sidebar">
+                            <h2>Choose tier</h2>
+                            <div class="tier-cards tier-cards--stack">
+                                <div class="tier-card" data-tier="1">
+                                    <h3>Tier 1 — Report</h3>
+                                    <p class="tier-price">$149 <span>per analysis</span></p>
+                                    <button type="button" class="btn btn-tier btn-primary" data-tier="1">Pay & get report</button>
+                                </div>
+                                <div class="tier-card" data-tier="2">
+                                    <h3>Tier 2 — Expert</h3>
+                                    <p class="tier-price">$1,500–$5,000</p>
+                                    <button type="button" class="btn btn-tier btn-secondary" data-tier="2">Request expert</button>
+                                </div>
+                                <div class="tier-card" data-tier="3">
+                                    <h3>Tier 3 — Enterprise</h3>
+                                    <p class="tier-price">$5,000+</p>
+                                    <button type="button" class="btn btn-tier btn-secondary" data-tier="3">Request enterprise</button>
+                                </div>
+                                <div id="demo-tier-card" class="tier-card tier-card-demo hidden">
+                                    <h3>Demo</h3>
+                                    <p class="tier-desc">Dev only (<code>ICEA_DEMO=1</code>)</p>
+                                    <button type="button" class="btn btn-tier btn-primary" id="btn-view-report">View report (HTML)</button>
+                                    <button type="button" class="btn btn-tier btn-secondary" id="btn-demo-report">Download PDF</button>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </aside>
+                </div>
+
+                <p class="disclaimer">Estimates are directional and depend on workload behavior. Not a substitute for profiling.</p>
+
+                <!-- Path 2: Job-level analysis from event log -->
+                <div class="path path-2" id="path-2">
+                    <div class="path__header">
+                        <span class="path__badge">Path 2</span>
+                        <h2 class="path__title">From event log — same report flow</h2>
+                        <p class="path__desc">Upload a Spark event log; we derive workload from it. You get the same preview, tier choice, and full ICEA report after payment as Path 1.</p>
+                    </div>
+                <section class="card eventlog-section">
+                    <ol class="eventlog-steps">
+                        <li>Select a Spark event log (<code>.json</code> or <code>.json.gz</code>)</li>
+                        <li>Optionally set executor hourly cost (for cost and report)</li>
+                        <li>Click <strong>Ingest & get job summary</strong></li>
+                        <li>Review the analysis, choose a tier, then pay and get your full ICEA report</li>
+                    </ol>
+                    <form id="eventlog-form" class="eventlog-form">
+                        <div class="eventlog-form__fields">
+                            <div class="row">
+                                <label for="eventlog-file">Event log file</label>
+                                <input type="file" id="eventlog-file" name="file" accept=".json,.gz,application/json,application/gzip">
+                            </div>
+                            <div class="row">
+                                <label for="eventlog-executor-hourly">Executor hourly cost (USD) <span class="optional">optional, for cost column</span></label>
+                                <input type="number" id="eventlog-executor-hourly" name="executor_hourly_cost_usd" min="0" step="0.01" placeholder="e.g. 0.05">
+                            </div>
+                        </div>
+                        <div class="eventlog-form__actions">
+                            <button type="submit" class="btn btn-primary" id="eventlog-ingest-btn">Ingest &amp; get job summary</button>
+                            <button type="button" class="btn btn-secondary" id="eventlog-use-sample" title="Load and ingest the sample event log">Use sample</button>
+                        </div>
+                    </form>
+                    <div id="eventlog-error" class="error-message hidden"></div>
+                    <div id="eventlog-result" class="eventlog-result hidden">
+                        <div class="eventlog-result__summary">
+                            <div class="eventlog-result__stat">
+                                <span class="eventlog-result__label">Jobs</span>
+                                <span id="eventlog-total-jobs" class="eventlog-result__value">0</span>
+                            </div>
+                            <div class="eventlog-result__stat">
+                                <span class="eventlog-result__label">Executor-hours</span>
+                                <span id="eventlog-total-hrs" class="eventlog-result__value">0</span>
+                            </div>
+                            <div class="eventlog-result__stat">
+                                <span class="eventlog-result__label">Est. cost</span>
+                                <span id="eventlog-total-cost" class="eventlog-result__value">—</span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary eventlog-result__download" id="eventlog-download-pdf">Download job-level PDF (free)</button>
+                        <div id="eventlog-analysis" class="eventlog-analysis hidden">
+                            <h3 class="eventlog-analysis__title">Get your full ICEA report</h3>
+                            <div class="eventlog-preview">
+                                <div class="preview-grid">
+                                    <div class="preview-item">
+                                        <span class="preview-label">Efficiency score</span>
+                                        <span id="eventlog-preview-score" class="preview-value">—</span>
+                                    </div>
+                                    <div class="preview-item">
+                                        <span class="preview-label">Est. monthly waste</span>
+                                        <span id="eventlog-preview-waste" class="preview-value">—</span>
+                                    </div>
+                                    <div class="preview-item">
+                                        <span class="preview-label">Executors per node</span>
+                                        <span id="eventlog-preview-executors" class="preview-value">—</span>
+                                    </div>
+                                    <div class="preview-item">
+                                        <span class="preview-label">Projected savings (vs current)</span>
+                                        <span id="eventlog-preview-savings" class="preview-value">—</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="eventlog-tier-cards tier-cards tier-cards--stack">
+                                <div class="tier-card" data-tier="1" data-path="2">
+                                    <h3>Tier 1 — Report</h3>
+                                    <p class="tier-price">$149 <span>per analysis</span></p>
+                                    <button type="button" class="btn btn-tier btn-primary" data-tier="1" data-path="2">Pay &amp; get report</button>
+                                </div>
+                                <div class="tier-card" data-tier="2" data-path="2">
+                                    <h3>Tier 2 — Expert</h3>
+                                    <p class="tier-price">$1,500–$5,000</p>
+                                    <button type="button" class="btn btn-tier btn-secondary" data-tier="2" data-path="2">Request expert</button>
+                                </div>
+                                <div class="tier-card" data-tier="3" data-path="2">
+                                    <h3>Tier 3 — Enterprise</h3>
+                                    <p class="tier-price">$5,000+</p>
+                                    <button type="button" class="btn btn-tier btn-secondary" data-tier="3" data-path="2">Request enterprise</button>
+                                </div>
+                                <div id="demo-tier-card-path2" class="tier-card tier-card-demo hidden">
+                                    <h3>Demo</h3>
+                                    <p class="tier-desc">Dev only</p>
+                                    <button type="button" class="btn btn-tier btn-primary" id="btn-view-report-path2">View report (HTML)</button>
+                                    <button type="button" class="btn btn-tier btn-secondary" id="btn-demo-report-path2">Download PDF</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                </div>
+                <!-- end Path 2 -->
+
+            </div>
+            <!-- end container -->
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p style="margin-bottom: 15px; font-style: italic; opacity: 0.9;">Performance failures are business risks — until they are engineered.</p>
+            <p>&copy; 2026 KPI99 LLC. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        window.EMAILJS_USER_ID = window.EMAILJS_USER_ID || "";
+        window.EMAILJS_SERVICE_ID = window.EMAILJS_SERVICE_ID || "";
+        window.EMAILJS_TEMPLATE_ID = window.EMAILJS_TEMPLATE_ID || "";
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="/app.js"></script>
+    <script>
+        (function() {
+            var nav = document.getElementById('mainNav');
+            if (!nav) return;
+            function onScroll() {
+                if (window.scrollY > 20) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+            }
+            window.addEventListener('scroll', onScroll, { passive: true });
+            onScroll();
+        })();
+    </script>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MKZ889ZT"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+</body>
+</html>

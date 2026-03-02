@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sample report preview | ICEA | KPI99</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root { --kpi-dark: #1e293b; --kpi-muted: #64748b; --kpi-accent: #3b82f6; --kpi-accent-dark: #1e3a8a; --kpi-grid: #e2e8f0; --kpi-success: #10b981; --kpi-warn: #ef4444; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif; color: #1e293b; background: #f8fafc; margin: 0; padding: 24px; line-height: 1.5; }
+    .report { max-width: 800px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; }
+    .header img.favicon { width: 32px; height: 32px; }
+    .header .brand { font-weight: 700; color: #1e293b; }
+    .header .tagline { font-size: 0.85rem; color: #64748b; }
+    .preview-badge { display: inline-block; background: #f1f5f9; color: #64748b; font-size: 0.8rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; margin-bottom: 12px; }
+    h1 { font-size: 1.75rem; color: #1e293b; margin: 0 0 4px 0; }
+    .subtitle { font-size: 0.9rem; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
+    h2 { font-size: 1.25rem; font-weight: 700; color: #1e3a8a; margin: 32px 0 0 0; padding-bottom: 8px; border-bottom: 2px solid #3b82f6; letter-spacing: 0.02em; }
+    h2:first-of-type { margin-top: 0; }
+    p { margin: 0 0 8px 0; color: #1e293b; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+    th, td { border: 1px solid #e2e8f0; padding: 10px 12px; text-align: left; vertical-align: top; }
+    th { background: #1e3a8a; color: white; font-weight: 600; }
+    tr:nth-child(even) { background: #f8fafc; }
+    .bar-wrap { margin: 8px 0; }
+    .bar { height: 20px; border-radius: 4px; margin: 4px 0; }
+    .bar-label { font-size: 0.85rem; color: #64748b; margin-bottom: 2px; }
+    .preview-cta { margin-top: 32px; padding: 24px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; text-align: center; }
+    .preview-cta p { margin-bottom: 12px; color: #475569; }
+    .preview-cta .btn { display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 8px; }
+    .preview-cta .btn:hover { background: #1e3a8a; }
+    .preview-cta ul { text-align: left; max-width: 400px; margin: 16px auto 0; padding-left: 20px; font-size: 0.9rem; color: #64748b; }
+    .back-link { display: inline-block; margin-bottom: 16px; color: #3b82f6; text-decoration: none; font-weight: 500; }
+    .back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<p><a href="/en/" class="back-link">← Back to ICEA</a></p>
+<div class="report">
+<div class="header">
+<img src="/favicon.png" alt="" class="favicon" width="32" height="32">
+<div>
+<div class="brand">KPI99</div>
+<div class="tagline">Performance. Scale. Reliability—Engineered.</div>
+</div>
+</div>
+<span class="preview-badge">Sample preview</span>
+<h1>Infrastructure Cost & Efficiency Report</h1>
+<p class="subtitle">Example of what your Tier 1 report includes.</p>
+
+<h2>Executive Summary</h2>
+<p>This report analyzes your Spark cluster configuration: 10 node(s), 4 cores and 16 GB memory per executor, with an average of 30.0 minutes runtime and 100 jobs per day. The current configuration packs 4 executor(s) per node (total 40 executors). The packing efficiency score is 100/100: higher means less idle CPU and memory. Estimated monthly cost from this workload is approximately $12,750.00; of that, about $0.00/month is attributed to resource waste (unused capacity).</p>
+<p style="margin-top: 12px;">Efficiency score: <strong>100/100</strong>. Estimated monthly waste: <strong>$0.00</strong>.</p>
+
+<h2>Current vs Recommended Configuration</h2>
+<table><tbody>
+<tr><th></th><th>Current</th><th>Recommended</th></tr>
+<tr><td>Executor cores</td><td>4</td><td>2</td></tr>
+<tr><td>Executor memory (GB)</td><td>16.0</td><td>8.0</td></tr>
+<tr><td>Executors per node</td><td>4</td><td>8</td></tr>
+<tr><td>Efficiency score</td><td>100</td><td>100</td></tr>
+</tbody></table>
+
+<h2>Resource Utilization</h2>
+<div class="bar-wrap"><div class="bar-label">CPU</div><div class="bar" style="width: 100%; max-width: 300px; background: linear-gradient(to right, #3b82f6 0%, #3b82f6 100%, #e2e8f0 100%, #e2e8f0 100%);"></div><span>100%</span></div>
+<div class="bar-wrap"><div class="bar-label">Memory</div><div class="bar" style="width: 100%; max-width: 300px; background: linear-gradient(to right, #10b981 0%, #10b981 100%, #e2e8f0 100%, #e2e8f0 100%);"></div><span>100%</span></div>
+
+<h2>Cost Breakdown (Monthly)</h2>
+<p class="subtitle">Monthly cost is approximately $12,750.00 from node price × usage; $0.00 of that is estimated waste.</p>
+<div class="bar-wrap"><div class="bar-label">Total $12,750/mo (utilized vs waste)</div><div class="bar" style="width: 100%; max-width: 300px; background: linear-gradient(to right, #10b981 0%, #10b981 100%, #ef4444 100%, #ef4444 100%);"></div></div>
+
+<div class="preview-cta">
+<p><strong>The full Tier 1 report also includes:</strong></p>
+<ul>
+<li>Cost model assumptions & savings projection</li>
+<li>Engineering notes & next steps</li>
+<li>Risks & mitigations</li>
+<li>Methodology, sensitivity (what-if), data quality</li>
+<li>Definitions & understanding sections</li>
+</ul>
+</div>
+</div>
+</body>
+</html>
