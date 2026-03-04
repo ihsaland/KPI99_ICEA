@@ -10,30 +10,31 @@ from io import BytesIO
 from typing import BinaryIO
 
 
-def normalize_eventlog_content(content: bytes, filename: str = "") -> tuple[bytes, str]:
+def normalize_eventlog_content(content: bytes, filename: str = "") -> list[tuple[bytes, str]]:
     """
-    If content is a .zip, extract the first event log file (.json or .json.gz) and return (content, inner_name).
-    Otherwise return (content, filename) unchanged.
+    If content is a .zip, extract all event log files (.json / .json.gz / .gz) and return
+    a list of (content, inner_name) so the caller can parse and merge. Spark may write
+    one or many JSON files per log. Otherwise return [(content, filename)].
     """
     if not content or len(content) < 4:
-        return content, filename
+        return [(content, filename)] if content else []
     # ZIP magic: PK\x03\x04
     if content[:2] != b"PK":
-        return content, filename
+        return [(content, filename)]
     try:
         z = zipfile.ZipFile(BytesIO(content), "r")
     except zipfile.BadZipFile:
-        return content, filename
-    # Prefer .json or .json.gz; else first member that is a file
+        return [(content, filename)]
     candidates = [n for n in z.namelist() if not n.endswith("/")]
-    json_first = [n for n in candidates if n.lower().endswith(".json") or n.lower().endswith(".json.gz") or n.lower().endswith(".gz")]
-    name = (json_first[0] if json_first else candidates[0]) if candidates else None
-    if not name:
-        z.close()
-        return content, filename
-    inner = z.read(name)
+    # All JSON-like members (Spark can emit one or many files)
+    json_like = [
+        n for n in candidates
+        if n.lower().endswith(".json") or n.lower().endswith(".json.gz") or n.lower().endswith(".gz")
+    ]
+    names = json_like if json_like else candidates
+    out = [(z.read(n), n) for n in names]
     z.close()
-    return inner, name
+    return out if out else [(content, filename)]
 
 
 def _get(d: dict, *keys: str):
@@ -75,14 +76,21 @@ def _read_event_lines(content: bytes, filename: str = "") -> list[dict]:
     return events
 
 
-def parse_event_log(content: bytes, filename: str = "") -> tuple[dict[int, set[int]], dict[int, dict], list[dict]]:
+def parse_event_log(
+    content: bytes | None = None,
+    filename: str = "",
+    events: list[dict] | None = None,
+) -> tuple[dict[int, set[int]], dict[int, dict], dict[int, dict]]:
     """
     Parse event log and return:
     - job_stages: job_id -> set of stage_ids
     - job_times: job_id -> {start_time_ms?, end_time_ms?, result?}
     - stage_metrics: stage_id -> {executor_run_time_ms, bytes_read, bytes_written, task_count}
+
+    Call with either (content, filename) or (events=...) for a single pass over pre-read events (e.g. from many zip members).
     """
-    events = _read_event_lines(content, filename)
+    if events is None:
+        events = _read_event_lines(content or b"", filename)
     job_stages: dict[int, set[int]] = defaultdict(set)
     job_times: dict[int, dict] = defaultdict(dict)
     stage_metrics: dict[int, dict] = defaultdict(lambda: {"executor_run_time_ms": 0, "bytes_read": 0, "bytes_written": 0, "task_count": 0})
@@ -146,6 +154,14 @@ def parse_event_log(content: bytes, filename: str = "") -> tuple[dict[int, set[i
                 stage_metrics[stage_id]["bytes_written"] += int(swb)
 
     return dict(job_stages), dict(job_times), dict(stage_metrics)
+
+
+def read_all_events(parts: list[tuple[bytes, str]]) -> list[dict]:
+    """Read event lines from each (content, filename) and return one combined list. One pass over parts, single event list for parse_event_log(events=)."""
+    out: list[dict] = []
+    for content, name in parts:
+        out.extend(_read_event_lines(content, name))
+    return out
 
 
 def aggregate_job_level(
