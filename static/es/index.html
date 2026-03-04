@@ -78,7 +78,7 @@
                     </div>
                     <ul class="instructions-list instructions-list--paths">
                         <li class="instructions-step"><a href="#path-1" class="instructions-link">Ruta 1 — Entrada manual</a>: Configure clúster y carga en el formulario → vea la vista previa → elija nivel → pague y obtenga el informe (o solicite experto).</li>
-                        <li class="instructions-step"><a href="#path-2" class="instructions-link">Ruta 2 — Desde registro de eventos</a>: Suba un registro de eventos Spark (.json o .json.gz) → derivamos la carga del registro → misma vista previa, nivel e informe completo tras el pago.</li>
+                        <li class="instructions-step"><a href="#path-2" class="instructions-link">Ruta 2 — Desde registro de eventos</a>: Suba un registro de eventos Spark (.json, .json.gz o .zip) → derivamos la carga del registro → misma vista previa, nivel e informe completo tras el pago.</li>
                     </ul>
                 </div>
 
@@ -365,7 +365,7 @@
                     </div>
                 <section class="card eventlog-section">
                     <ol class="eventlog-steps">
-                        <li>Seleccione un registro de eventos Spark (<code>.json</code> o <code>.json.gz</code>)</li>
+                        <li>Seleccione un registro de eventos Spark (<code>.json</code>, <code>.json.gz</code> o <code>.zip</code>)</li>
                         <li>Opcionalmente indique el costo horario por ejecutor (para costos e informe)</li>
                         <li>Haga clic en <strong>Ingerir y obtener resumen de trabajos</strong></li>
                         <li>Revise el análisis, elija un nivel, pague y obtenga su informe ICEA completo</li>
@@ -375,7 +375,7 @@
                             <div class="row">
                                 <label for="eventlog-file">Archivo de registro de eventos</label>
                                 <div class="file-picker">
-                                    <input type="file" id="eventlog-file" name="file" class="file-picker__input" accept=".json,.gz,application/json,application/gzip">
+                                    <input type="file" id="eventlog-file" name="file" class="file-picker__input" accept=".json,.gz,.zip,application/json,application/gzip,application/zip">
                                     <button type="button" class="btn btn-secondary file-picker__btn" id="eventlog-file-btn">Elegir archivo</button>
                                     <span class="file-picker__name" id="eventlog-file-name">Ningún archivo seleccionado</span>
                                 </div>

@@ -28,7 +28,7 @@ from icea.recommend import recommend
 from icea.report.pdf import generate_report_pdf
 from icea.report.html_report import generate_report_html
 from icea.report.job_report import generate_job_report_pdf
-from icea.eventlog import parse_event_log, aggregate_job_level
+from icea.eventlog import normalize_eventlog_content, parse_event_log, aggregate_job_level
 from icea.payments import (
     create_pending_report,
     consume_pending_report,
@@ -596,19 +596,20 @@ def analyze_from_eventlog(body: AnalyzeFromEventlogRequest):
 
 @app.post("/v1/ingest/eventlog")
 async def ingest_eventlog(
-    file: UploadFile = File(..., description="Spark event log (.json or .json.gz)"),
+    file: UploadFile = File(..., description="Spark event log (.json, .json.gz, or .zip)"),
     executor_hourly_cost_usd: float | None = Form(None, description="Optional: hourly cost per executor for cost attribution"),
 ):
     """
     Ingest a Spark event log and return per-job metrics. Use the result with POST /v1/report/jobs to get a PDF.
     """
-    if not file.filename or not file.filename.lower().endswith((".json", ".gz")):
-        raise HTTPException(status_code=400, detail="File must be a .json or .json.gz Spark event log.")
+    if not file.filename or not file.filename.lower().endswith((".json", ".gz", ".zip")):
+        raise HTTPException(status_code=400, detail="File must be a .json, .json.gz, or .zip Spark event log.")
     content = await file.read()
     if len(content) > 50 * 1024 * 1024:  # 50 MB limit
         raise HTTPException(status_code=400, detail="Event log too large (max 50 MB).")
+    content, log_filename = normalize_eventlog_content(content, file.filename or "")
     try:
-        job_stages, job_times, stage_metrics = parse_event_log(content, file.filename or "")
+        job_stages, job_times, stage_metrics = parse_event_log(content, log_filename)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse event log: {e!s}")
     jobs = aggregate_job_level(job_stages, job_times, stage_metrics, executor_hourly_cost_usd)

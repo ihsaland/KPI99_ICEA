@@ -1,12 +1,39 @@
 """
-Spark event log ingestion: parse JSON/JSON.gz event logs and aggregate per-job metrics.
+Spark event log ingestion: parse JSON/JSON.gz/.zip event logs and aggregate per-job metrics.
 Supports SparkListenerJobStart, SparkListenerJobEnd, SparkListenerTaskEnd.
 """
 import gzip
 import json
+import zipfile
 from collections import defaultdict
 from io import BytesIO
 from typing import BinaryIO
+
+
+def normalize_eventlog_content(content: bytes, filename: str = "") -> tuple[bytes, str]:
+    """
+    If content is a .zip, extract the first event log file (.json or .json.gz) and return (content, inner_name).
+    Otherwise return (content, filename) unchanged.
+    """
+    if not content or len(content) < 4:
+        return content, filename
+    # ZIP magic: PK\x03\x04
+    if content[:2] != b"PK":
+        return content, filename
+    try:
+        z = zipfile.ZipFile(BytesIO(content), "r")
+    except zipfile.BadZipFile:
+        return content, filename
+    # Prefer .json or .json.gz; else first member that is a file
+    candidates = [n for n in z.namelist() if not n.endswith("/")]
+    json_first = [n for n in candidates if n.lower().endswith(".json") or n.lower().endswith(".json.gz") or n.lower().endswith(".gz")]
+    name = (json_first[0] if json_first else candidates[0]) if candidates else None
+    if not name:
+        z.close()
+        return content, filename
+    inner = z.read(name)
+    z.close()
+    return inner, name
 
 
 def _get(d: dict, *keys: str):

@@ -78,7 +78,7 @@
                     </div>
                     <ul class="instructions-list instructions-list--paths">
                         <li class="instructions-step"><a href="#path-1" class="instructions-link">Path 1 — Manual entry</a>: Configure cluster and workload in the form → see live preview → choose tier → pay and get report (or request expert).</li>
-                        <li class="instructions-step"><a href="#path-2" class="instructions-link">Path 2 — From event log</a>: Upload a Spark event log (.json or .json.gz) → we derive workload from the log → same preview, tier choice, and full report after payment.</li>
+                        <li class="instructions-step"><a href="#path-2" class="instructions-link">Path 2 — From event log</a>: Upload a Spark event log (.json, .json.gz, or .zip) → we derive workload from the log → same preview, tier choice, and full report after payment.</li>
                     </ul>
                 </div>
 
@@ -365,7 +365,7 @@
                     </div>
                 <section class="card eventlog-section">
                     <ol class="eventlog-steps">
-                        <li>Select a Spark event log (<code>.json</code> or <code>.json.gz</code>)</li>
+                        <li>Select a Spark event log (<code>.json</code>, <code>.json.gz</code>, or <code>.zip</code>)</li>
                         <li>Optionally set executor hourly cost (for cost and report)</li>
                         <li>Click <strong>Ingest & get job summary</strong></li>
                         <li>Review the analysis, choose a tier, then pay and get your full ICEA report</li>
@@ -374,7 +374,7 @@
                         <div class="eventlog-form__fields">
                             <div class="row">
                                 <label for="eventlog-file">Event log file</label>
-                                <input type="file" id="eventlog-file" name="file" accept=".json,.gz,application/json,application/gzip">
+                                <input type="file" id="eventlog-file" name="file" accept=".json,.gz,.zip,application/json,application/gzip,application/zip">
                             </div>
                             <div class="row">
                                 <label for="eventlog-executor-hourly">Executor hourly cost (USD) <span class="optional">optional, for cost column</span></label>
