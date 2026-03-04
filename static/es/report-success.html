@@ -1,36 +1,93 @@
 <!DOCTYPE html>
 <html lang="es" dir="ltr">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MKZ889ZT');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>Informe listo — ICEA | KPI99</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=2">
     <link rel="icon" type="image/png" href="/favicon.png?v=2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google tag (gtag.js) - GA4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7MQY2WJ67"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-M7MQY2WJ67');
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17859706167"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'AW-17859706167');
+    </script>
     <link rel="stylesheet" href="/styles.css">
     <style>
-        .success-page { max-width: 560px; margin: 0 auto; padding: 80px 20px; text-align: center; }
-        .success-page h1 { font-size: 1.75rem; color: #1e3a8a; margin-bottom: 0.5rem; }
-        .success-page p { color: #64748b; margin-bottom: 1.5rem; }
-        .success-page .btn { display: inline-block; margin-top: 0.5rem; }
+        .success-card { max-width: 560px; margin: 0 auto; padding: 2rem; text-align: center; }
+        .success-card h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .success-card p { color: #475569; margin-bottom: 1.5rem; }
+        .success-card .btn { display: inline-block; margin: 0.25rem; }
     </style>
 </head>
 <body>
-    <div class="success-page">
-        <h1>Pago exitoso</h1>
-        <p>Su informe KPI99 ICEA está listo. Véalo en el navegador o descargue en PDF.</p>
-        <a href="#" id="view-link" class="btn btn-primary">Ver informe</a>
-        <a href="#" id="download-link" class="btn" style="margin-left: 0.5rem; background: #64748b;">Descargar PDF</a>
-        <p style="margin-top: 1.5rem;"><a href="/es/">Ejecutar otro análisis</a></p>
-    </div>
+    <!-- Navigation (match main site) -->
+    <nav id="mainNav">
+        <div class="container">
+            <div class="nav-inner">
+                <a href="https://kpi99.co/es/" class="logo" target="_blank" rel="noopener noreferrer"><img src="/menu_logo.png" alt="KPI99"></a>
+                <a href="/en/report-success.html" class="nav-lang" rel="alternate" hreflang="en">English</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header (match main site hero) -->
+    <header class="hero">
+        <div class="container">
+            <h1>Analizador de costes y eficiencia de infraestructura</h1>
+            <p class="tagline">Informe listo — ver o descargar su análisis ICEA.</p>
+        </div>
+    </header>
+
+    <main>
+        <section class="content-section">
+            <div class="container">
+                <div class="card success-card">
+                    <h2 id="success-title">Pago exitoso</h2>
+                    <p id="success-message">Su informe KPI99 ICEA está listo. Véalo en el navegador o descargue en PDF.</p>
+                    <a href="#" id="view-link" class="btn btn-primary">Ver informe</a>
+                    <a href="#" id="download-link" class="btn btn-secondary">Descargar PDF</a>
+                    <p style="margin-top: 1.5rem;"><a href="/es/">Ejecutar otro análisis</a></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Las fallas de rendimiento son riesgos de negocio — hasta que se diseñan. Potenciado con Ingeniería de Rendimiento Aumentada por IA.</p>
+            <p><a href="https://kpi99.co/es/privacy.html" target="_blank" rel="noopener noreferrer">Política de privacidad</a> · <a href="https://kpi99.co/es/cookie-policy.html" target="_blank" rel="noopener noreferrer">Política de cookies</a></p>
+            <p>&copy; 2026 KPI99 LLC. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
     <script>
         (function() {
             var params = new URLSearchParams(window.location.search);
             var token = params.get('token');
             if (!token) {
-                document.querySelector('.success-page h1').textContent = 'Token faltante';
-                document.querySelector('.success-page p').textContent = 'No hay token de informe en la URL. Inicie un nuevo análisis desde la página principal.';
+                document.getElementById('success-title').textContent = 'Token faltante';
+                document.getElementById('success-message').textContent = 'No hay token de informe en la URL. Inicie un nuevo análisis desde la página principal.';
                 document.getElementById('view-link').style.display = 'none';
                 document.getElementById('download-link').style.display = 'none';
                 return;
@@ -42,6 +99,26 @@
             downloadLink.download = 'icea-report.pdf';
             downloadLink.target = '_blank';
         })();
+        (function() {
+            var token = new URLSearchParams(window.location.search).get('token');
+            var langLink = document.querySelector('.nav-lang');
+            if (token && langLink) langLink.href = langLink.getAttribute('href').split('?')[0] + '?token=' + encodeURIComponent(token);
+        })();
     </script>
+    <script>
+        (function() {
+            var nav = document.getElementById('mainNav');
+            if (!nav) return;
+            function onScroll() {
+                if (window.scrollY > 20) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+            }
+            window.addEventListener('scroll', onScroll, { passive: true });
+            onScroll();
+        })();
+    </script>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MKZ889ZT"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 </body>
 </html>
