@@ -119,11 +119,12 @@ class AnalyzeResponse(BaseModel):
 
 
 class CheckoutTier1Request(BaseModel):
-    """Request for Tier 1 checkout: config + optional URLs (base for success, no token)."""
+    """Request for Tier 1 checkout: config + optional URLs (base for success, no token). Optional promo_code for free report."""
     request: AnalyzeRequest
     success_url_base: Optional[str] = None  # e.g. https://icea.example.com/report-success.html
     cancel_url: Optional[str] = None
     amount_cents: Optional[int] = Field(14900, ge=14900, le=14900)  # $149 LATAM-competitive
+    promo_code: Optional[str] = None  # when set and matches ICEA_TIER1_FREE_CODE, skip payment and return success_url
 
 
 class ExpertRequest(BaseModel):

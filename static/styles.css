@@ -663,6 +663,25 @@ nav .nav-lang:hover {
 .pricing h2 {
     margin-top: 0;
 }
+.tier-promo-row {
+    margin-bottom: 1rem;
+}
+.tier-promo-row label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 0.35rem;
+}
+.tier-promo-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: 'Manrope', sans-serif;
+}
+
 .pricing .tier-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -947,11 +966,11 @@ textarea {
     }
 }
 
-/* Footer — KPI99 format (match kpi99.co) */
+/* Footer — match diagnostic.kpi99.co (light slate, policy links, copyright) */
 footer {
-    background: #0f172a;
-    color: white;
-    padding: 40px 0;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 2rem 0;
     margin-top: auto;
     text-align: center;
 }
@@ -961,14 +980,24 @@ footer .container {
 }
 
 footer p {
-    margin-bottom: 10px;
-    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #475569;
 }
 
 footer p:last-child {
     margin-bottom: 0;
-    font-size: 0.9rem;
-    opacity: 0.9;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+footer a {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+footer a:hover {
+    color: #1e40af;
 }
 
 /* Errors */

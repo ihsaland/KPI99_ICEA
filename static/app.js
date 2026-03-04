@@ -187,12 +187,15 @@
     var pathBase = localePrefix ? localePrefix + "/" : "/";
     var successBase = window.location.origin + pathBase + "report-success.html";
     var cancelUrl = window.location.origin + pathBase;
+    var promoEl = document.getElementById("tier1-promo-code");
+    var promoCode = (promoEl && promoEl.value && promoEl.value.trim()) ? promoEl.value.trim() : null;
     var body = {
       request: requestPayload,
       success_url_base: successBase,
       cancel_url: cancelUrl,
       amount_cents: 14900,
     };
+    if (promoCode) body.promo_code = promoCode;
     var tier1Btns = document.querySelectorAll('.btn-tier[data-tier="1"]');
     tier1Btns.forEach(function (b) { b.disabled = true; });
     fetch("/v1/checkout/tier1", {
@@ -217,6 +220,10 @@
         });
       })
       .then(function (data) {
+        if (data.free && data.success_url) {
+          window.location.href = data.success_url;
+          return;
+        }
         if (data.checkout_url) window.location.href = data.checkout_url;
         else setFormError("No checkout URL returned.", true);
       })

@@ -342,11 +342,42 @@ def payment_link_redirect():
     return RedirectResponse(url="/", status_code=302)
 
 
+def _tier1_success_url(req: Request, body: CheckoutTier1Request, token: str) -> str:
+    """Build success URL for Tier 1 (Stripe or free-code flow)."""
+    base = str(req.base_url).rstrip("/")
+    public_base = (os.environ.get("ICEA_PUBLIC_URL") or "").strip().rstrip("/")
+    client_success_base = body.success_url_base or f"{base}/report-success.html"
+    if public_base:
+        path = urlparse(client_success_base).path or "/report-success.html"
+        if not path.startswith("/"):
+            path = "/" + path
+        return public_base + path + f"?token={token}"
+    return client_success_base + f"?token={token}"
+
+
 @app.post("/v1/checkout/tier1")
 def checkout_tier1(body: CheckoutTier1Request, req: Request):
     """
-    Create Stripe Checkout for Tier 1 ($149). Returns checkout_url and token for success redirect.
+    Create Stripe Checkout for Tier 1 ($149), or grant free report when promo_code matches ICEA_TIER1_FREE_CODE.
+    Returns checkout_url and token (payment), or success_url and free: true (code).
     """
+    code = (body.promo_code or "").strip()
+    free_code = (os.environ.get("ICEA_TIER1_FREE_CODE") or "").strip()
+    # When a promo code is sent: either grant free report (match) or reject. Never send to Stripe.
+    if code:
+        if not free_code:
+            return JSONResponse(status_code=400, content={"detail": "Promo codes are not configured."})
+        if code.lower() == free_code.lower():
+            try:
+                request_dict = body.request.model_dump()
+                token = create_pending_report(request_dict)
+                success_url = _tier1_success_url(req, body, token)
+                return {"success_url": success_url, "free": True, "token": token}
+            except Exception as e:
+                _LOG.exception("Free tier1 (code) failed")
+                return JSONResponse(status_code=500, content={"detail": "Could not create report."})
+        return JSONResponse(status_code=400, content={"detail": "Invalid promo code."})
+
     if not get_stripe_secret_key():
         payment_link = os.environ.get("STRIPE_PAYMENT_LINK", "").strip() or None
         return JSONResponse(
