@@ -3,6 +3,7 @@ import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
+from urllib.parse import urlparse
 
 from fastapi import FastAPI, Request, HTTPException, File, UploadFile, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -359,8 +360,21 @@ def checkout_tier1(body: CheckoutTier1Request, req: Request):
         request_dict = body.request.model_dump()
         token = create_pending_report(request_dict)
         base = str(req.base_url).rstrip("/")
-        success_url = (body.success_url_base or f"{base}/report-success.html") + f"?token={token}"
-        cancel_url = body.cancel_url or base + "/"
+        # Use public URL for redirects when set (e.g. behind proxy) so Stripe redirects to the right host
+        public_base = (os.environ.get("ICEA_PUBLIC_URL") or "").strip().rstrip("/")
+        client_success_base = body.success_url_base or f"{base}/report-success.html"
+        client_cancel = body.cancel_url or (base + "/")
+        if public_base:
+            path = urlparse(client_success_base).path or "/report-success.html"
+            if not path.startswith("/"):
+                path = "/" + path
+            success_url = public_base + path + f"?token={token}"
+            cancel_path = urlparse(client_cancel).path or "/"
+            if not cancel_path.startswith("/"):
+                cancel_path = "/" + cancel_path
+            cancel_url = public_base + cancel_path
+        else:
+            success_url = client_success_base + f"?token={token}"
         amount = body.amount_cents if body.amount_cents is not None else 14900
         checkout_url = create_checkout_session(
             token=token,
