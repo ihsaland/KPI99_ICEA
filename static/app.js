@@ -358,10 +358,19 @@
       });
   });
 
-  // Tier buttons (Path 1: form payload; Path 2: derived from event log)
+  // Tier 1: use checkout flow (promo code + Stripe or free redirect). Path 1 = form payload; Path 2 = event log result.
   document.querySelectorAll(".btn-tier[data-tier='1']").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      window.location.href = "/v1/payment-link";
+      var isPath2 = btn.getAttribute("data-path") === "2";
+      if (isPath2) {
+        if (!lastPath2AnalyzeResult || !lastPath2AnalyzeResult.request) {
+          setFormError("Run the event log analysis first (Ingest & get job summary).", true);
+          return;
+        }
+        startTier1CheckoutWithRequest(lastPath2AnalyzeResult.request);
+      } else {
+        startTier1Checkout();
+      }
     });
   });
   document.querySelectorAll(".btn-tier[data-tier='2']").forEach(function (btn) {
