@@ -193,7 +193,7 @@
       request: requestPayload,
       success_url_base: successBase,
       cancel_url: cancelUrl,
-      amount_cents: 14900,
+      amount_cents: 9900,
     };
     if (promoCode) body.promo_code = promoCode;
     var tier1Btns = document.querySelectorAll('.btn-tier[data-tier="1"]');

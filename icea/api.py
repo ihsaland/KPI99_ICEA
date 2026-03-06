@@ -358,7 +358,7 @@ def _tier1_success_url(req: Request, body: CheckoutTier1Request, token: str) -> 
 @app.post("/v1/checkout/tier1")
 def checkout_tier1(body: CheckoutTier1Request, req: Request):
     """
-    Create Stripe Checkout for Tier 1 ($149), or grant free report when promo_code matches ICEA_TIER1_FREE_CODE.
+    Create Stripe Checkout for Tier 1 ($99), or grant free report when promo_code matches ICEA_TIER1_FREE_CODE.
     Returns checkout_url and token (payment), or success_url and free: true (code).
     """
     code = (body.promo_code or "").strip()
@@ -406,7 +406,7 @@ def checkout_tier1(body: CheckoutTier1Request, req: Request):
             cancel_url = public_base + cancel_path
         else:
             success_url = client_success_base + f"?token={token}"
-        amount = body.amount_cents if body.amount_cents is not None else 14900
+        amount = body.amount_cents if body.amount_cents is not None else 9900
         checkout_url = create_checkout_session(
             token=token,
             amount_cents=amount,

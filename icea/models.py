@@ -123,7 +123,7 @@ class CheckoutTier1Request(BaseModel):
     request: AnalyzeRequest
     success_url_base: Optional[str] = None  # e.g. https://icea.example.com/report-success.html
     cancel_url: Optional[str] = None
-    amount_cents: Optional[int] = Field(14900, ge=14900, le=14900)  # $149 LATAM-competitive
+    amount_cents: Optional[int] = Field(9900, ge=9900, le=9900)  # $99
     promo_code: Optional[str] = None  # when set and matches ICEA_TIER1_FREE_CODE, skip payment and return success_url
 
 

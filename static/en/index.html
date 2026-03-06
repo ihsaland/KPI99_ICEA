@@ -330,7 +330,7 @@
                             <div class="tier-cards tier-cards--stack">
                                 <div class="tier-card" data-tier="1">
                                     <h3>Tier 1 — Report</h3>
-                                    <p class="tier-price">$149 <span>USD per analysis</span></p>
+                                    <p class="tier-price">$99 <span>USD per analysis</span></p>
                                     <button type="button" class="btn btn-tier btn-primary" data-tier="1">Pay & get report</button>
                                 </div>
                                 <div class="tier-card" data-tier="2">
@@ -375,7 +375,11 @@
                         <div class="eventlog-form__fields">
                             <div class="row">
                                 <label for="eventlog-file">Event log file</label>
-                                <input type="file" id="eventlog-file" name="file" accept=".json,.gz,.zip,application/json,application/gzip,application/zip">
+                                <div class="file-picker">
+                                    <input type="file" id="eventlog-file" name="file" class="file-picker__input" accept=".json,.gz,.zip,application/json,application/gzip,application/zip">
+                                    <button type="button" class="btn btn-secondary file-picker__btn" id="eventlog-file-btn">Choose file</button>
+                                    <span class="file-picker__name" id="eventlog-file-name">No file selected</span>
+                                </div>
                             </div>
                             <div class="row">
                                 <label for="eventlog-executor-hourly">Executor hourly cost (USD) <span class="optional">optional, for cost column</span></label>
@@ -429,7 +433,7 @@
                             <div class="eventlog-tier-cards tier-cards tier-cards--stack">
                                 <div class="tier-card" data-tier="1" data-path="2">
                                     <h3>Tier 1 — Report</h3>
-                                    <p class="tier-price">$149 <span>USD per analysis</span></p>
+                                    <p class="tier-price">$99 <span>USD per analysis</span></p>
                                     <button type="button" class="btn btn-tier btn-primary" data-tier="1" data-path="2">Pay &amp; get report</button>
                                 </div>
                                 <div class="tier-card" data-tier="2" data-path="2">
@@ -462,8 +466,9 @@
 
     <footer>
         <div class="container">
-            <p style="margin-bottom: 15px; font-style: italic; opacity: 0.9;">Performance failures are business risks — until they are engineered.</p>
-            <p><a href="https://kpi99.co/en/privacy.html" target="_blank" rel="noopener" style="color: rgba(255,255,255,0.9); text-decoration: underline;">Privacy Policy</a> · <a href="https://kpi99.co/en/cookie-policy.html" target="_blank" rel="noopener" style="color: rgba(255,255,255,0.9); text-decoration: underline;">Cookie Policy</a></p>
+            <p class="footer-tagline">Performance failures are business risks — until they are engineered. Enhanced with AI-Augmented Performance Engineering.</p>
+            <p class="footer-cta">This report shows your infrastructure cost and efficiency. <a href="https://kpi99.co/en/" target="_blank" rel="noopener noreferrer">KPI99</a> turns it into <strong>prioritized recommendations, right-sizing, and optional workshops</strong>—aligned with FinOps and SRE.</p>
+            <p><a href="https://kpi99.co/en/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a> · <a href="https://kpi99.co/en/cookie-policy.html" target="_blank" rel="noopener noreferrer">Cookie Policy</a></p>
             <p>&copy; 2026 KPI99 LLC. All rights reserved.</p>
         </div>
     </footer>
