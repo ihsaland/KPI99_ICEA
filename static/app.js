@@ -532,6 +532,7 @@
         jobs: data.jobs || [],
         executor_hourly_cost_usd: executorHourly,
         source_filename: data.source_filename || null,
+        cluster_info: data.cluster_info || null,
       }),
     }).then(function (r) {
       if (!r.ok) return r.json().then(function (j) { throw new Error(j.detail || r.statusText); });

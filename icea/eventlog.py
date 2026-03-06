@@ -26,12 +26,18 @@ def normalize_eventlog_content(content: bytes, filename: str = "") -> list[tuple
     except zipfile.BadZipFile:
         return [(content, filename)]
     candidates = [n for n in z.namelist() if not n.endswith("/")]
-    # All JSON-like members (Spark can emit one or many files)
+    # Event log members: explicit .json/.gz extensions OR Spark-style events_* (exclude appstatus)
     json_like = [
         n for n in candidates
         if n.lower().endswith(".json") or n.lower().endswith(".json.gz") or n.lower().endswith(".gz")
     ]
-    names = json_like if json_like else candidates
+    # Spark zips often use names like events_0_appid, events_1_appid with no extension
+    events_like = [
+        n for n in candidates
+        if "events" in n.lower() and "appstatus" not in n.lower()
+    ]
+    combined = list(dict.fromkeys(json_like + events_like))  # prefer json_like first, then events_*
+    names = combined if combined else candidates
     out = [(z.read(n), n) for n in names]
     z.close()
     return out if out else [(content, filename)]
@@ -93,7 +99,12 @@ def parse_event_log(
         events = _read_event_lines(content or b"", filename)
     job_stages: dict[int, set[int]] = defaultdict(set)
     job_times: dict[int, dict] = defaultdict(dict)
-    stage_metrics: dict[int, dict] = defaultdict(lambda: {"executor_run_time_ms": 0, "bytes_read": 0, "bytes_written": 0, "task_count": 0})
+    stage_metrics: dict[int, dict] = defaultdict(lambda: {
+        "executor_run_time_ms": 0, "bytes_read": 0, "bytes_written": 0, "task_count": 0,
+        "peak_execution_memory_bytes": 0, "executor_cpu_time_ns": 0,
+        "memory_spilled_bytes": 0, "disk_spilled_bytes": 0,
+        "shuffle_read_bytes": 0, "shuffle_write_bytes": 0,
+    })
 
     for ev in events:
         event_type = _get(ev, "Event")
@@ -134,6 +145,23 @@ def parse_event_log(
             if run_time is not None:
                 stage_metrics[stage_id]["executor_run_time_ms"] += int(run_time)
             stage_metrics[stage_id]["task_count"] += 1
+            # Executor CPU Time (nanoseconds in Spark)
+            cpu_ns = _get(task_metrics, "Executor CPU Time", "Executor CPUTime", "ExecutorCpuTime")
+            if cpu_ns is not None:
+                stage_metrics[stage_id]["executor_cpu_time_ns"] += int(cpu_ns)
+            # Peak Execution Memory (bytes) — max across tasks
+            peak_mem = _get(task_metrics, "Peak Execution Memory", "PeakExecutionMemory")
+            if peak_mem is not None:
+                stage_metrics[stage_id]["peak_execution_memory_bytes"] = max(
+                    stage_metrics[stage_id]["peak_execution_memory_bytes"], int(peak_mem)
+                )
+            # Spill
+            mem_spill = _get(task_metrics, "Memory Bytes Spilled", "MemoryBytesSpilled")
+            if mem_spill is not None:
+                stage_metrics[stage_id]["memory_spilled_bytes"] += int(mem_spill)
+            disk_spill = _get(task_metrics, "Disk Bytes Spilled", "DiskBytesSpilled")
+            if disk_spill is not None:
+                stage_metrics[stage_id]["disk_spilled_bytes"] += int(disk_spill)
             # Input/Output bytes
             input_metrics = _get(task_metrics, "Input Metrics", "InputMetrics") or {}
             output_metrics = _get(task_metrics, "Output Metrics", "OutputMetrics") or {}
@@ -143,17 +171,93 @@ def parse_event_log(
             bw = _get(output_metrics, "Bytes Written", "BytesWritten")
             if bw is not None:
                 stage_metrics[stage_id]["bytes_written"] += int(bw)
-            # Shuffle read/write
+            # Shuffle read/write (also add to bytes_read/bytes_written for backward compat)
             shuffle_read = _get(task_metrics, "Shuffle Read Metrics", "ShuffleReadMetrics") or {}
             shuffle_write = _get(task_metrics, "Shuffle Write Metrics", "ShuffleWriteMetrics") or {}
             srb = _get(shuffle_read, "Remote Bytes Read", "Total Bytes Read")
             if srb is not None:
                 stage_metrics[stage_id]["bytes_read"] += int(srb)
+                stage_metrics[stage_id]["shuffle_read_bytes"] += int(srb)
             swb = _get(shuffle_write, "Shuffle Bytes Written", "Bytes Written")
             if swb is not None:
                 stage_metrics[stage_id]["bytes_written"] += int(swb)
+                stage_metrics[stage_id]["shuffle_write_bytes"] += int(swb)
 
     return dict(job_stages), dict(job_times), dict(stage_metrics)
+
+
+def _parse_spark_memory_to_gb(s: str | None) -> float | None:
+    """Parse Spark memory string (e.g. '11g', '1024m', '1g') to GB. Returns None if invalid."""
+    if not s or not isinstance(s, str):
+        return None
+    s = s.strip().lower()
+    if not s:
+        return None
+    mult = 1.0
+    if s.endswith("g"):
+        mult = 1.0
+        s = s[:-1]
+    elif s.endswith("m") or s.endswith("mb"):
+        mult = 1.0 / 1024.0
+        s = s.rstrip("b").rstrip("m")
+    elif s.endswith("k"):
+        mult = 1.0 / (1024 * 1024)
+        s = s[:-1]
+    try:
+        return round(float(s) * mult, 2)
+    except ValueError:
+        return None
+
+
+def extract_cluster_info(events: list[dict]) -> dict:
+    """
+    Extract executor count and executor config from SparkListenerExecutorAdded and
+    SparkListenerEnvironmentUpdate so defaults can be overridden when building the analysis request.
+    Returns dict with optional: executor_count, executor_cores, executor_memory_gb.
+    """
+    executor_ids: set[str] = set()
+    executor_cores: int | None = None
+    executor_memory_gb: float | None = None
+    spark_props: dict = {}
+
+    for ev in events:
+        event_type = _get(ev, "Event")
+        if not event_type:
+            continue
+        if event_type == "SparkListenerExecutorAdded":
+            eid = ev.get("Executor ID") or ev.get("ExecutorId")
+            if eid is not None and str(eid).lower() != "driver":
+                executor_ids.add(str(eid))
+            info = ev.get("Executor Info") or ev.get("ExecutorInfo") or {}
+            if info and executor_cores is None:
+                executor_cores = info.get("Total Cores") or info.get("TotalCores")
+                if executor_cores is not None:
+                    executor_cores = int(executor_cores)
+        elif event_type == "SparkListenerEnvironmentUpdate":
+            sp = ev.get("Spark Properties") or ev.get("SparkProperties")
+            if isinstance(sp, dict):
+                spark_props.update(sp)
+
+    # Prefer Spark properties for executor config (authoritative)
+    if spark_props:
+        cores_str = spark_props.get("spark.executor.cores")
+        if cores_str is not None:
+            try:
+                executor_cores = int(cores_str)
+            except (ValueError, TypeError):
+                pass
+        mem_str = spark_props.get("spark.executor.memory")
+        if mem_str is not None:
+            executor_memory_gb = _parse_spark_memory_to_gb(mem_str)
+
+    out: dict = {}
+    if executor_ids:
+        out["executor_count"] = len(executor_ids)
+    if executor_cores is not None and executor_cores > 0:
+        out["executor_cores"] = executor_cores
+    if executor_memory_gb is not None and executor_memory_gb > 0:
+        out["executor_memory_gb"] = executor_memory_gb
+    return out
 
 
 def read_all_events(parts: list[tuple[bytes, str]]) -> list[dict]:
@@ -185,11 +289,25 @@ def aggregate_job_level(
         executor_run_time_ms = 0
         bytes_read = 0
         bytes_written = 0
+        peak_execution_memory_bytes = 0
+        executor_cpu_time_ns = 0
+        memory_spilled_bytes = 0
+        disk_spilled_bytes = 0
+        shuffle_read_bytes = 0
+        shuffle_write_bytes = 0
         for sid in stage_ids:
             sm = stage_metrics.get(sid, {})
             executor_run_time_ms += sm.get("executor_run_time_ms", 0)
             bytes_read += sm.get("bytes_read", 0)
             bytes_written += sm.get("bytes_written", 0)
+            peak_execution_memory_bytes = max(
+                peak_execution_memory_bytes, sm.get("peak_execution_memory_bytes", 0)
+            )
+            executor_cpu_time_ns += sm.get("executor_cpu_time_ns", 0)
+            memory_spilled_bytes += sm.get("memory_spilled_bytes", 0)
+            disk_spilled_bytes += sm.get("disk_spilled_bytes", 0)
+            shuffle_read_bytes += sm.get("shuffle_read_bytes", 0)
+            shuffle_write_bytes += sm.get("shuffle_write_bytes", 0)
 
         executor_hours = executor_run_time_ms / (1000.0 * 3600.0)
         estimated_cost_usd = None
@@ -199,7 +317,7 @@ def aggregate_job_level(
         duration_sec = (round((end - start) / 1000.0, 2) if start is not None and end is not None else
                        round(executor_run_time_ms / 1000.0, 2))
 
-        jobs.append({
+        job_out = {
             "job_id": job_id,
             "duration_ms": duration_ms,
             "duration_sec": duration_sec,
@@ -209,6 +327,19 @@ def aggregate_job_level(
             "bytes_written": bytes_written,
             "estimated_cost_usd": estimated_cost_usd,
             "result": times.get("result", "Unknown"),
-        })
+        }
+        if peak_execution_memory_bytes > 0:
+            job_out["peak_execution_memory_bytes"] = peak_execution_memory_bytes
+        if executor_cpu_time_ns > 0:
+            job_out["executor_cpu_time_ms"] = round(executor_cpu_time_ns / 1e6, 2)
+        if memory_spilled_bytes > 0:
+            job_out["memory_spilled_bytes"] = memory_spilled_bytes
+        if disk_spilled_bytes > 0:
+            job_out["disk_spilled_bytes"] = disk_spilled_bytes
+        if shuffle_read_bytes > 0:
+            job_out["shuffle_read_bytes"] = shuffle_read_bytes
+        if shuffle_write_bytes > 0:
+            job_out["shuffle_write_bytes"] = shuffle_write_bytes
+        jobs.append(job_out)
     jobs.sort(key=lambda x: x["job_id"])
     return jobs

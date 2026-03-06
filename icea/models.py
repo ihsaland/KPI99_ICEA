@@ -147,6 +147,13 @@ class JobLevelSummary(BaseModel):
     bytes_written: int = 0
     estimated_cost_usd: Optional[float] = None
     result: str = "Unknown"
+    # Optional metrics from TaskMetrics for better workload/risk analysis
+    peak_execution_memory_bytes: Optional[int] = None
+    executor_cpu_time_ms: Optional[float] = None
+    memory_spilled_bytes: Optional[int] = None
+    disk_spilled_bytes: Optional[int] = None
+    shuffle_read_bytes: Optional[int] = None
+    shuffle_write_bytes: Optional[int] = None
 
 
 class JobReportRequest(BaseModel):
@@ -156,6 +163,13 @@ class JobReportRequest(BaseModel):
     source_filename: Optional[str] = None
 
 
+class ClusterInfo(BaseModel):
+    """Cluster shape from event log (SparkListenerExecutorAdded / EnvironmentUpdate). Overrides defaults when present."""
+    executor_count: Optional[int] = Field(None, ge=1, description="Number of executors observed in the log")
+    executor_cores: Optional[int] = Field(None, ge=1, le=32, description="Cores per executor from log")
+    executor_memory_gb: Optional[float] = Field(None, ge=0.5, le=128, description="Executor memory (GB) from log")
+
+
 class AnalyzeFromEventlogRequest(BaseModel):
     """Request for POST /v1/analyze/from-eventlog: ingest result + optional node/executor overrides."""
     jobs: list[JobLevelSummary]
@@ -163,3 +177,4 @@ class AnalyzeFromEventlogRequest(BaseModel):
     source_filename: Optional[str] = None
     node: Optional[NodeConfig] = None
     executor: Optional[ExecutorConfig] = None
+    cluster_info: Optional[ClusterInfo] = None

@@ -14,6 +14,7 @@ from icea.models import (
     AnalyzeFromEventlogRequest,
     Assumptions,
     CheckoutTier1Request,
+    ClusterInfo,
     ExecutorConfig,
     ExpertRequest,
     JobLevelSummary,
@@ -29,7 +30,13 @@ from icea.recommend import recommend
 from icea.report.pdf import generate_report_pdf
 from icea.report.html_report import generate_report_html
 from icea.report.job_report import generate_job_report_pdf
-from icea.eventlog import normalize_eventlog_content, read_all_events, parse_event_log, aggregate_job_level
+from icea.eventlog import (
+    normalize_eventlog_content,
+    read_all_events,
+    parse_event_log,
+    aggregate_job_level,
+    extract_cluster_info,
+)
 from icea.payments import (
     create_pending_report,
     consume_pending_report,
@@ -175,12 +182,49 @@ def _analyze_request_from_eventlog(body: AnalyzeFromEventlogRequest) -> AnalyzeR
     avg_runtime_minutes = max(0.1, min(1440, avg_runtime_minutes))
     # Assume log represents ~30 days for jobs_per_day
     jobs_per_day = max(0.1, min(100000, len(jobs) / 30.0))
-    workload = WorkloadConfig(avg_runtime_minutes=round(avg_runtime_minutes, 2), jobs_per_day=round(jobs_per_day, 2))
-    # Default node: 8 cores, 32 GB; hourly from executor_hourly * 4 or 0.20
+    workload_kw: dict = {
+        "avg_runtime_minutes": round(avg_runtime_minutes, 2),
+        "jobs_per_day": round(jobs_per_day, 2),
+    }
+    # Use event log metrics for better risk/right-sizing when present
+    peak_bytes = [getattr(j, "peak_execution_memory_bytes", None) or 0 for j in jobs]
+    if any(peak_bytes):
+        workload_kw["peak_executor_memory_gb"] = round(max(peak_bytes) / (1024**3), 2)
+    bytes_reads = [j.bytes_read for j in jobs if j.bytes_read > 0]
+    if bytes_reads:
+        workload_kw["input_data_gb"] = round((sum(bytes_reads) / len(bytes_reads)) / (1024**3), 2)
+    shuffle_r = [getattr(j, "shuffle_read_bytes", None) or 0 for j in jobs]
+    shuffle_w = [getattr(j, "shuffle_write_bytes", None) or 0 for j in jobs]
+    if any(shuffle_r):
+        workload_kw["shuffle_read_mb"] = round((sum(shuffle_r) / len(jobs)) / (1024 * 1024), 2)
+    if any(shuffle_w):
+        workload_kw["shuffle_write_mb"] = round((sum(shuffle_w) / len(jobs)) / (1024 * 1024), 2)
+    workload = WorkloadConfig(**workload_kw)
     executor_hourly = body.executor_hourly_cost_usd if body.executor_hourly_cost_usd is not None and body.executor_hourly_cost_usd >= 0 else 0.05
-    node_hourly = executor_hourly * 4 if executor_hourly else 0.20
-    node = body.node or NodeConfig(cores=8, memory_gb=32, hourly_cost_usd=round(node_hourly, 4), count=1)
-    executor = body.executor or ExecutorConfig(cores=4, memory_gb=16)
+    node_hourly = round(executor_hourly * 4 if executor_hourly else 0.20, 4)
+    # Executor: user override > cluster_info from log > default
+    if body.executor is not None:
+        executor = body.executor
+    elif body.cluster_info and (body.cluster_info.executor_cores or body.cluster_info.executor_memory_gb):
+        executor = ExecutorConfig(
+            cores=body.cluster_info.executor_cores or 4,
+            memory_gb=body.cluster_info.executor_memory_gb or 16.0,
+        )
+    else:
+        executor = ExecutorConfig(cores=4, memory_gb=16)
+    # Node: user override > cluster_info from log (1 executor per node, count = executor_count) > default
+    if body.node is not None:
+        node = body.node
+    elif body.cluster_info and body.cluster_info.executor_count and body.cluster_info.executor_count >= 1:
+        # Match log: N nodes, each sized for one executor
+        node = NodeConfig(
+            cores=executor.cores,
+            memory_gb=executor.memory_gb,
+            hourly_cost_usd=node_hourly,
+            count=body.cluster_info.executor_count,
+        )
+    else:
+        node = NodeConfig(cores=8, memory_gb=32, hourly_cost_usd=node_hourly, count=1)
     return AnalyzeRequest(
         cloud="aws",
         node=node,
@@ -656,18 +700,22 @@ async def ingest_eventlog(
     try:
         events = read_all_events(parts)
         job_stages, job_times, stage_metrics = parse_event_log(events=events)
+        cluster_info_raw = extract_cluster_info(events)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse event log: {e!s}")
     jobs = aggregate_job_level(job_stages, job_times, stage_metrics, executor_hourly_cost_usd)
     total_executor_hours = sum(j["executor_hours"] for j in jobs)
     total_estimated_cost = sum(j["estimated_cost_usd"] or 0 for j in jobs)
-    return {
+    out = {
         "jobs": [JobLevelSummary(**j) for j in jobs],
         "total_jobs": len(jobs),
         "total_executor_hours": round(total_executor_hours, 4),
         "total_estimated_cost_usd": round(total_estimated_cost, 2) if executor_hourly_cost_usd else None,
         "source_filename": file.filename,
     }
+    if cluster_info_raw:
+        out["cluster_info"] = cluster_info_raw
+    return out
 
 
 @app.post("/v1/report/jobs")
