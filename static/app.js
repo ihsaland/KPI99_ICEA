@@ -188,7 +188,8 @@
     var successBase = window.location.origin + pathBase + "report-success.html";
     var cancelUrl = window.location.origin + pathBase;
     var promoEl = document.getElementById("tier1-promo-code");
-    var promoCode = (promoEl && promoEl.value && promoEl.value.trim()) ? promoEl.value.trim() : null;
+    var promoEl2 = document.getElementById("tier1-promo-code-path2");
+    var promoCode = (promoEl && promoEl.value && promoEl.value.trim()) ? promoEl.value.trim() : (promoEl2 && promoEl2.value && promoEl2.value.trim()) ? promoEl2.value.trim() : null;
     var body = {
       request: requestPayload,
       success_url_base: successBase,
