@@ -62,6 +62,7 @@
         <div class="container">
             <h1>Infrastructure Cost & Efficiency Analyzer</h1>
             <p class="tagline">Identify waste, optimize executor packing, and get a shareable PDF report for Spark workloads.</p>
+            <p class="tagline" style="margin-top: 14px; font-size: 0.95rem; opacity: 0.95; max-width: 640px; margin-left: auto; margin-right: auto;">This tool produces evidence. <a href="https://kpi99.co/en/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">KPI99</a> turns it into <strong>prioritized recommendations, roadmaps, and optional implementation support</strong>—aligned with FinOps and SRE.</p>
         </div>
     </header>
 
@@ -326,10 +327,6 @@
                         </section>
                         <section class="pricing card pricing--sidebar">
                             <h2>Choose tier</h2>
-                            <div class="tier-promo-row">
-                                <label for="tier1-promo-code">Voucher code</label>
-                                <input type="text" id="tier1-promo-code" name="promo_code" placeholder="Enter voucher code" autocomplete="off" class="tier-promo-input">
-                            </div>
                             <div class="tier-cards tier-cards--stack">
                                 <div class="tier-card" data-tier="1">
                                     <h3>Tier 1 — Report</h3>
@@ -378,11 +375,7 @@
                         <div class="eventlog-form__fields">
                             <div class="row">
                                 <label for="eventlog-file">Event log file</label>
-                                <div class="file-picker">
-                                    <input type="file" id="eventlog-file" name="file" class="file-picker__input" accept=".json,.gz,.zip,application/json,application/gzip,application/zip">
-                                    <button type="button" class="btn btn-secondary file-picker__btn" id="eventlog-file-btn">Choose file</button>
-                                    <span class="file-picker__name" id="eventlog-file-name">No file selected</span>
-                                </div>
+                                <input type="file" id="eventlog-file" name="file" accept=".json,.gz,.zip,application/json,application/gzip,application/zip">
                             </div>
                             <div class="row">
                                 <label for="eventlog-executor-hourly">Executor hourly cost (USD) <span class="optional">optional, for cost column</span></label>
@@ -469,8 +462,8 @@
 
     <footer>
         <div class="container">
-            <p>Performance failures are business risks — until they are engineered. Enhanced with AI-Augmented Performance Engineering.</p>
-            <p><a href="https://kpi99.co/en/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a> · <a href="https://kpi99.co/en/cookie-policy.html" target="_blank" rel="noopener noreferrer">Cookie Policy</a></p>
+            <p style="margin-bottom: 15px; font-style: italic; opacity: 0.9;">Performance failures are business risks — until they are engineered.</p>
+            <p><a href="https://kpi99.co/en/privacy.html" target="_blank" rel="noopener" style="color: rgba(255,255,255,0.9); text-decoration: underline;">Privacy Policy</a> · <a href="https://kpi99.co/en/cookie-policy.html" target="_blank" rel="noopener" style="color: rgba(255,255,255,0.9); text-decoration: underline;">Cookie Policy</a></p>
             <p>&copy; 2026 KPI99 LLC. All rights reserved.</p>
         </div>
     </footer>

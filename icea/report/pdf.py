@@ -18,6 +18,9 @@ from icea.models import AnalyzeRequest, PackingResult, CostResult, RecommendedCo
 from icea.report.templates import (
     executive_summary,
     executive_summary_narrative,
+    executive_key_takeaway,
+    methodology_citation,
+    benchmark_compare_note,
     explanations_section,
     definitions_section,
     current_vs_recommended,
@@ -203,6 +206,9 @@ def _pdf_labels(lang: str) -> dict:
             "current_usd": "Actual (USD)",
             "recommended_usd": "Recomendada (USD)",
             "savings_usd": "Ahorro (USD)",
+            "scenario_summary": "Resumen de escenarios (costo mensual)",
+            "scenario": "Escenario",
+            "monthly_cost_usd": "Costo mensual (USD)",
             "engineering_notes": "Notas de ingeniería",
             "next_steps": "Próximos pasos",
             "risks_mitigations": "Riesgos y mitigaciones",
@@ -259,6 +265,9 @@ def _pdf_labels(lang: str) -> dict:
         "current_usd": "Current (USD)",
         "recommended_usd": "Recommended (USD)",
         "savings_usd": "Savings (USD)",
+        "scenario_summary": "Scenario summary (monthly cost)",
+        "scenario": "Scenario",
+        "monthly_cost_usd": "Monthly cost (USD)",
         "engineering_notes": "Engineering Notes",
         "next_steps": "Next Steps",
         "risks_mitigations": "Risks & Mitigations",
@@ -413,6 +422,7 @@ def generate_report_pdf(
     # ----- Part 1: Header & Executive summary -----
     story.extend(_header_flowables(styles, meta, static_dir=static_dir))
     story.append(Paragraph(L["report_title"], styles["ICEA_Title"]))
+    story.append(Paragraph(_escape_para(executive_key_takeaway(req, packing, cost, recommendation, lang=lang)), styles["ICEA_Body"]))
     story.append(Spacer(1, SECTION_SPACER))
 
     ex = executive_summary(packing, cost, recommendation)
@@ -434,6 +444,7 @@ def generate_report_pdf(
         L["your_score"].format(benchmark["efficiency_score"], benchmark["text"]),
         styles["ICEA_Small"],
     ))
+    story.append(Paragraph(_escape_para(benchmark_compare_note(lang=lang)), styles["ICEA_Small"]))
     story.append(Spacer(1, SECTION_SPACER))
 
     # ----- Part 2: Configuration & cost at a glance -----
@@ -470,6 +481,18 @@ def generate_report_pdf(
         sav_data.append([L["proj_savings"], f"{sav['savings_monthly_usd']:,.2f}"])
     story.append(_table_with_header(sav_data, [2.5 * inch, 2 * inch]))
     story.append(Paragraph(_escape_para(L["estimates_note"]), styles["ICEA_Small"]))
+    sens_early = sensitivity_section(req, cost, recommendation)
+    scenario_data = [[L["scenario"], L["monthly_cost_usd"]]]
+    scenario_data.append([L["current_label"], f"${sens_early['current_monthly_usd']:,.2f}"])
+    if recommendation and recommendation.savings_vs_current_monthly_usd > 0:
+        rec_monthly = sens_early["current_monthly_usd"] - recommendation.savings_vs_current_monthly_usd
+        scenario_data.append([L["recommended"], f"${rec_monthly:,.2f}"])
+    scenario_data.append([L["if_nodes_plus"].format(sens_early["node_count"] + 1), f"${sens_early['if_nodes_plus_one_monthly_usd']:,.2f}"])
+    if sens_early.get("if_nodes_minus_one_monthly_usd") is not None:
+        scenario_data.append([L["if_nodes_minus"].format(sens_early["node_count"] - 1), f"${sens_early['if_nodes_minus_one_monthly_usd']:,.2f}"])
+    scenario_data.append([L["if_runtime_20"], f"${sens_early['if_runtime_plus_20_pct_monthly_usd']:,.2f}"])
+    story.append(Paragraph(L["scenario_summary"], styles["ICEA_H2"]))
+    story.append(_table_with_header(scenario_data, [3 * inch, 1.8 * inch]))
     story.append(Spacer(1, SECTION_SPACER))
 
     # ----- Part 3: Analysis detail (utilization, assumptions, forecast, sensitivity) -----
@@ -535,8 +558,8 @@ def generate_report_pdf(
     story.append(Spacer(1, SECTION_SPACER))
 
     story.append(Paragraph(L["next_steps"], styles["ICEA_H2"]))
-    for s in next_steps_section(req, packing, recommendation, lang=lang):
-        story.append(Paragraph("• " + _escape_para(s), styles["ICEA_Body"]))
+    for i, s in enumerate(next_steps_section(req, packing, recommendation, lang=lang), 1):
+        story.append(Paragraph(f"{i}. " + _escape_para(s), styles["ICEA_Body"]))
     story.append(Spacer(1, SECTION_SPACER))
 
     risks_mitigations = risks_mitigations_section(risk_notes, lang=lang)
@@ -550,6 +573,7 @@ def generate_report_pdf(
 
     # ----- Part 5: Reference (methodology, data quality, CTA, glossary) -----
     story.append(Paragraph(L["methodology"], styles["ICEA_H2"]))
+    story.append(Paragraph(_escape_para(methodology_citation(lang=lang)), styles["ICEA_Body"]))
     story.append(Paragraph(L["how_calculated"], styles["ICEA_Small"]))
     for m in methodology_section(lang=lang):
         story.append(Paragraph(f"<b>{_escape_para(m['title'])}</b>", styles["ICEA_Body"]))

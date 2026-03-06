@@ -5,6 +5,9 @@ from icea.models import AnalyzeRequest, PackingResult, CostResult, RecommendedCo
 from icea.report.templates import (
     executive_summary,
     executive_summary_narrative,
+    executive_key_takeaway,
+    methodology_citation,
+    benchmark_compare_note,
     explanations_section,
     definitions_section,
     current_vs_recommended,
@@ -73,6 +76,9 @@ _SECTIONS = {
         "current_usd": "Current (USD)",
         "recommended_usd": "Recommended (USD)",
         "savings_usd": "Savings (USD)",
+        "scenario_summary": "Scenario summary (monthly cost)",
+        "scenario": "Scenario",
+        "monthly_cost_usd": "Monthly cost (USD)",
         "engineering_notes": "Engineering Notes",
         "next_steps": "Next Steps",
         "risks_mitigations": "Risks & Mitigations",
@@ -134,6 +140,9 @@ _SECTIONS = {
         "current_usd": "Actual (USD)",
         "recommended_usd": "Recomendada (USD)",
         "savings_usd": "Ahorro (USD)",
+        "scenario_summary": "Resumen de escenarios (costo mensual)",
+        "scenario": "Escenario",
+        "monthly_cost_usd": "Costo mensual (USD)",
         "engineering_notes": "Notas de ingeniería",
         "next_steps": "Próximos pasos",
         "risks_mitigations": "Riesgos y mitigaciones",
@@ -250,6 +259,20 @@ def generate_report_html(
     """
 
     L = _SECTIONS[lang]
+    key_takeaway = executive_key_takeaway(req, packing, cost, recommendation, lang=lang)
+    benchmark_note = benchmark_compare_note(lang=lang)
+    scenario_rows = [
+        f"<tr><td>{L['current_label']}</td><td>${sensitivity['current_monthly_usd']:,.2f}</td></tr>",
+        f"<tr><td>{L['if_nodes_plus'].format(sensitivity['node_count'] + 1)}</td><td>${sensitivity['if_nodes_plus_one_monthly_usd']:,.2f}</td></tr>",
+    ]
+    if recommendation and recommendation.savings_vs_current_monthly_usd > 0:
+        rec_monthly = sensitivity["current_monthly_usd"] - recommendation.savings_vs_current_monthly_usd
+        scenario_rows.insert(1, f"<tr><td>{L['recommended']}</td><td>${rec_monthly:,.2f}</td></tr>")
+    if sensitivity.get("if_nodes_minus_one_monthly_usd") is not None:
+        scenario_rows.append(f"<tr><td>{L['if_nodes_minus'].format(sensitivity['node_count'] - 1)}</td><td>${sensitivity['if_nodes_minus_one_monthly_usd']:,.2f}</td></tr>")
+    scenario_rows.append(f"<tr><td>{L['if_runtime_20']}</td><td>${sensitivity['if_runtime_plus_20_pct_monthly_usd']:,.2f}</td></tr>")
+    scenario_table = f"<table><tbody><tr><th>{L['scenario']}</th><th>{L['monthly_cost_usd']}</th></tr>" + "".join(scenario_rows) + "</tbody></table>"
+    methodology_intro = methodology_citation(lang=lang)
     summary_text = (
         f"{L['summary_score']}: <strong>{ex['efficiency_score']}/100</strong>. "
         f"{L['summary_waste']}: <strong>${ex['waste_cost_monthly_usd']:,.2f}</strong>."
@@ -380,12 +403,14 @@ def generate_report_html(
 </div>
 </div>
 <h1>{L["report_title"]}</h1>
+<p><strong>{key_takeaway}</strong></p>
 <p class="subtitle">{meta["date"]}</p>
 {pdf_block}
 <h2>{L["exec_summary"]}</h2>
 <p>{exec_narrative}</p>
 <p style="margin-top: 12px;">{summary_text}</p>
 <p class="subtitle">{L['your_score'].format(benchmark['efficiency_score'], benchmark['text'])}</p>
+<p class="subtitle">{benchmark_note}</p>
 <h2>{L["current_vs_rec"]}</h2>
 {cvr_table}
 <h2>{L["resource_util"]}</h2>
@@ -400,17 +425,20 @@ def generate_report_html(
 <h2>{L["savings_proj"]}</h2>
 {sav_table}
 <p class="subtitle">{L["estimates_note"]}</p>
+<h2>{L["scenario_summary"]}</h2>
+{scenario_table}
 {forecast_html}
 <h2>{L["engineering_notes"]}</h2>
 <ul>
 {"".join(f"<li>{n}</li>" for n in notes)}
 </ul>
 <h2>{L["next_steps"]}</h2>
-<ul>
+<ol>
 {"".join(f"<li>{s}</li>" for s in next_steps)}
-</ul>
+</ol>
 {"<h2>" + L["risks_mitigations"] + "</h2><table><tbody><tr><th>" + L["risk"] + "</th><th>" + L["mitigation"] + "</th></tr>" + "".join(f"<tr><td>{rm['risk']}</td><td>{rm['mitigation']}</td></tr>" for rm in risks_mitigations) + "</tbody></table>" if risks_mitigations else ""}
 <h2>{L["methodology"]}</h2>
+<p>{methodology_intro}</p>
 <p class="section-intro">{L["how_calculated"]}</p>
 {"".join(f"<h3>{m['title']}</h3><p>{m['body']}</p>" for m in methodology)}
 <h2>{L["sensitivity"]}</h2>

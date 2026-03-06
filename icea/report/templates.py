@@ -459,6 +459,61 @@ def tier_cta_section(*, lang: str = "en") -> str:
         "Para una revisión detallada y un plan de optimización personalizado, solicite el análisis Tier 2 Experto o Tier 3 Empresa (contacto vía su cuenta KPI99 o la app ICEA).")
 
 
+def executive_key_takeaway(
+    req: AnalyzeRequest,
+    packing: PackingResult,
+    cost: CostResult,
+    recommendation: RecommendedConfig | None,
+    *,
+    lang: str = "en",
+) -> str:
+    """One-sentence bottom line for the report (prioritized action or status)."""
+    is_es = _t(lang, "en", "es") == "es"
+    waste = cost.waste_cost_monthly_usd
+    savings = recommendation.savings_vs_current_monthly_usd if recommendation else 0
+    if savings > 0:
+        return _t(
+            lang,
+            f"Bottom line: Focus on the recommended executor configuration first—it could reduce estimated waste by ${savings:,.0f}/month.",
+            f"Conclusión: Priorice la configuración de ejecutor recomendada; podría reducir el desperdicio estimado en ${savings:,.0f}/mes.",
+        )
+    if waste > 100:
+        return _t(
+            lang,
+            f"Bottom line: Estimated monthly waste is ${waste:,.0f}. Adjust executor size or node count to improve packing, then re-run to validate.",
+            f"Conclusión: El desperdicio mensual estimado es ${waste:,.0f}. Ajuste el tamaño del ejecutor o el número de nodos y vuelva a ejecutar para validar.",
+        )
+    if packing.efficiency_score >= 70:
+        return _t(
+            lang,
+            "Bottom line: Your configuration is in line with typical clusters. Re-run after workload changes to track efficiency over time.",
+            "Conclusión: Su configuración está acorde con clústeres típicos. Vuelva a ejecutar tras cambios de carga para seguir la eficiencia.",
+        )
+    return _t(
+        lang,
+        "Bottom line: Review executor size vs node capacity to improve packing; try the recommended configuration in staging first.",
+        "Conclusión: Revise el tamaño del ejecutor frente a la capacidad del nodo; pruebe la configuración recomendada en staging primero.",
+    )
+
+
+def methodology_citation(*, lang: str = "en") -> str:
+    """Citable one-liner for methodology (trust / single source of record)."""
+    return _t(
+        lang,
+        "This report was produced using the KPI99 ICEA methodology. Use it as the single source of record for sizing and cost decisions; re-run periodically to track efficiency over time.",
+        "Este informe se generó con la metodología KPI99 ICEA. Úselo como única fuente de referencia para decisiones de dimensionamiento y coste; vuelva a ejecutar periódicamente para seguir la eficiencia.",
+    )
+
+
+def benchmark_compare_note(*, lang: str = "en") -> str:
+    """Short note that benchmark is vs similar Spark workloads."""
+    return _t(
+        lang,
+        "Compared to typical Spark workloads of similar scale.",
+        "En comparación con cargas Spark típicas de escala similar.",
+    )
+
+
 def benchmark_context(efficiency_score: int, *, lang: str = "en") -> dict:
     """Efficiency score vs typical bands: below / in line / above."""
     is_es = _t(lang, "en", "es") == "es"
