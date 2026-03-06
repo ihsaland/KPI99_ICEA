@@ -26,7 +26,7 @@ def create_checkout_session(
     amount_cents: int,
     success_url: str,
     cancel_url: str,
-    description: str = "ICEA Tier 1 — Automated Report",
+    description: str = "One-time PDF and HTML report: infrastructure cost, efficiency score, waste estimate (USD), and recommended executor sizing for your Spark cluster.",
 ) -> Optional[str]:
     """Create Stripe Checkout Session; return checkout URL or None if Stripe not configured."""
     try:
