@@ -366,7 +366,7 @@ def checkout_tier1(body: CheckoutTier1Request, req: Request):
     # When a promo code is sent: either grant free report (match) or reject. Never send to Stripe.
     if code:
         if not free_code:
-            return JSONResponse(status_code=400, content={"detail": "Promo codes are not configured."})
+            return JSONResponse(status_code=400, content={"detail": "Voucher codes are not configured."})
         if code.lower() == free_code.lower():
             try:
                 request_dict = body.request.model_dump()
@@ -376,7 +376,7 @@ def checkout_tier1(body: CheckoutTier1Request, req: Request):
             except Exception as e:
                 _LOG.exception("Free tier1 (code) failed")
                 return JSONResponse(status_code=500, content={"detail": "Could not create report."})
-        return JSONResponse(status_code=400, content={"detail": "Invalid promo code."})
+        return JSONResponse(status_code=400, content={"detail": "Invalid voucher code."})
 
     if not get_stripe_secret_key():
         payment_link = os.environ.get("STRIPE_PAYMENT_LINK", "").strip() or None

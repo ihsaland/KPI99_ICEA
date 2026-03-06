@@ -1,5 +1,6 @@
 """PDF report rendering with ReportLab (spec: US Letter, margins, typography, KPI99 colors)."""
 import io
+import xml.sax.saxutils
 from pathlib import Path
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -8,6 +9,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Image,
 )
+from reportlab.platypus.flowables import Flowable
 from reportlab.graphics.shapes import Drawing, Rect, String, Group
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -59,6 +61,26 @@ MARGIN_LR = 0.75 * inch
 MARGIN_TOP = 0.85 * inch
 MARGIN_BOTTOM = 0.8 * inch
 SECTION_SPACER = 0.25 * inch
+
+
+def _escape_para(text: str) -> str:
+    """Escape &, <, > for ReportLab Paragraph XML so dynamic content does not break the PDF."""
+    if not text:
+        return ""
+    return xml.sax.saxutils.escape(text, {"&": "&amp;", "<": "&lt;", ">": "&gt;"})
+
+
+class _DrawingFlowable(Flowable):
+    """Wrap a ReportLab Drawing so it is laid out correctly as a flowable in the story."""
+
+    def __init__(self, drawing: Drawing):
+        self.drawing = drawing
+
+    def wrap(self, availWidth, availHeight):
+        return (self.drawing.width, self.drawing.height)
+
+    def draw(self):
+        self.drawing.drawOn(self.canv, 0, 0)
 
 
 def _styles():
@@ -309,11 +331,13 @@ def _draw_utilization_bars(cpu_util_pct: float, mem_util_pct: float) -> Drawing:
 
 def _draw_cost_breakdown(total: float, waste: float, savings: float) -> Drawing:
     """Simple cost breakdown bar: utilized vs waste, and savings if any."""
-    w, h = 400, 70
+    bar_h = 22
+    # When savings row is shown, use taller height so all content fits inside the flowable (avoids overlap)
+    h = 95 if savings > 0 else 70
+    w = 400
     d = Drawing(w, h)
     bar_w = 280
     x0, y0 = 100, h - 45
-    bar_h = 22
     if total <= 0:
         total = 1
     util_pct = ((total - waste) / total) * 100
@@ -386,16 +410,15 @@ def generate_report_pdf(
     story = []
     meta = report_metadata(lang=lang)
 
-    # Header: favicon (required) + optional logo + brand/tagline
+    # ----- Part 1: Header & Executive summary -----
     story.extend(_header_flowables(styles, meta, static_dir=static_dir))
     story.append(Paragraph(L["report_title"], styles["ICEA_Title"]))
     story.append(Spacer(1, SECTION_SPACER))
 
-    # Executive summary: full narrative + callout
     ex = executive_summary(packing, cost, recommendation)
     exec_narrative = executive_summary_narrative(req, packing, cost, recommendation, lang=lang)
     story.append(Paragraph(L["exec_summary"], styles["ICEA_H2"]))
-    story.append(Paragraph(exec_narrative, styles["ICEA_Body"]))
+    story.append(Paragraph(_escape_para(exec_narrative), styles["ICEA_Body"]))
     score = ex["efficiency_score"]
     waste_usd = ex["waste_cost_monthly_usd"]
     summary_text = (
@@ -413,7 +436,7 @@ def generate_report_pdf(
     ))
     story.append(Spacer(1, SECTION_SPACER))
 
-    # Current vs recommended
+    # ----- Part 2: Configuration & cost at a glance -----
     story.append(Paragraph(L["current_vs_rec"], styles["ICEA_H1"]))
     cvr = current_vs_recommended(req, packing, recommendation)
     table_data = [
@@ -430,20 +453,31 @@ def generate_report_pdf(
     story.append(_table_with_header(table_data, [2 * inch, 2 * inch, 2 * inch]))
     story.append(Spacer(1, SECTION_SPACER))
 
-    # Utilization visualization
+    story.append(Paragraph(L["cost_breakdown"], styles["ICEA_H2"]))
+    story.append(Paragraph(_escape_para(cost_breakdown_sentence(cost, lang=lang)), styles["ICEA_Small"]))
+    cbd = cost_breakdown_chart_data(cost, recommendation)
+    story.append(_DrawingFlowable(_draw_cost_breakdown(cbd["total_monthly_usd"], cbd["waste_monthly_usd"], cbd["savings_monthly_usd"])))
+    story.append(Spacer(1, 0.12 * inch))
+
+    story.append(Paragraph(L["savings_proj"], styles["ICEA_H2"]))
+    sav = savings_section(cost, recommendation)
+    sav_data = [
+        [L["metric"], "USD"],
+        [L["waste_daily"], f"{sav['waste_cost_daily_usd']:,.2f}"],
+        [L["waste_monthly"], f"{sav['waste_cost_monthly_usd']:,.2f}"],
+    ]
+    if sav["has_recommendation"]:
+        sav_data.append([L["proj_savings"], f"{sav['savings_monthly_usd']:,.2f}"])
+    story.append(_table_with_header(sav_data, [2.5 * inch, 2 * inch]))
+    story.append(Paragraph(_escape_para(L["estimates_note"]), styles["ICEA_Small"]))
+    story.append(Spacer(1, SECTION_SPACER))
+
+    # ----- Part 3: Analysis detail (utilization, assumptions, forecast, sensitivity) -----
     story.append(Paragraph(L["resource_util"], styles["ICEA_H2"]))
     ucd = utilization_chart_data(packing)
-    story.append(_draw_utilization_bars(ucd["cpu_util_pct"], ucd["mem_util_pct"]))
+    story.append(_DrawingFlowable(_draw_utilization_bars(ucd["cpu_util_pct"], ucd["mem_util_pct"])))
     story.append(Spacer(1, SECTION_SPACER))
 
-    # Cost breakdown visualization
-    story.append(Paragraph(L["cost_breakdown"], styles["ICEA_H2"]))
-    story.append(Paragraph(cost_breakdown_sentence(cost, lang=lang), styles["ICEA_Small"]))
-    cbd = cost_breakdown_chart_data(cost, recommendation)
-    story.append(_draw_cost_breakdown(cbd["total_monthly_usd"], cbd["waste_monthly_usd"], cbd["savings_monthly_usd"]))
-    story.append(Spacer(1, SECTION_SPACER))
-
-    # Cost assumptions (dynamic rows from ca)
     story.append(Paragraph(L["cost_assumptions"], styles["ICEA_H2"]))
     ca = cost_assumptions(req, cost)
     assump_data = [[L["input"], L["value"]]]
@@ -465,21 +499,6 @@ def generate_report_pdf(
     story.append(_table_with_header(assump_data, [2.5 * inch, 2.5 * inch]))
     story.append(Spacer(1, SECTION_SPACER))
 
-    # Savings
-    story.append(Paragraph(L["savings_proj"], styles["ICEA_H2"]))
-    sav = savings_section(cost, recommendation)
-    sav_data = [
-        [L["metric"], "USD"],
-        [L["waste_daily"], f"{sav['waste_cost_daily_usd']:,.2f}"],
-        [L["waste_monthly"], f"{sav['waste_cost_monthly_usd']:,.2f}"],
-    ]
-    if sav["has_recommendation"]:
-        sav_data.append([L["proj_savings"], f"{sav['savings_monthly_usd']:,.2f}"])
-    story.append(_table_with_header(sav_data, [2.5 * inch, 2 * inch]))
-    story.append(Paragraph(L["estimates_note"], styles["ICEA_Small"]))
-    story.append(Spacer(1, SECTION_SPACER))
-
-    # Forecast (when forecast_months set)
     forecast = forecast_data(req, cost, recommendation)
     if forecast:
         story.append(Paragraph(L["forecast_title"], styles["ICEA_H2"]))
@@ -489,44 +508,11 @@ def generate_report_pdf(
             growth_note = f" (crecimiento {gr:.1f}%/año)" if gr is not None and gr != 0 else ""
         story.append(Paragraph(L["forecast_subtitle"].format(len(forecast), growth_note), styles["ICEA_Small"]))
         fc_data = [[L["month"], L["current_usd"], L["recommended_usd"], L["savings_usd"]]]
-        for row in forecast[:24]:  # cap at 24 rows
+        for row in forecast[:24]:
             fc_data.append([str(row["month"]), f"{row['current_usd']:,.2f}", f"{row['recommended_usd']:,.2f}", f"{row['savings_usd']:,.2f}"])
         story.append(_table_with_header(fc_data, [1 * inch, 1.5 * inch, 1.5 * inch, 1.2 * inch]))
         story.append(Spacer(1, SECTION_SPACER))
 
-    # Engineering notes
-    story.append(Paragraph(L["engineering_notes"], styles["ICEA_H2"]))
-    notes = engineering_notes(packing, recommendation, risk_notes, lang=lang)
-    for n in notes:
-        story.append(Paragraph(f"• {n}", styles["ICEA_Body"]))
-    story.append(Spacer(1, SECTION_SPACER))
-
-    # Next steps
-    story.append(Paragraph(L["next_steps"], styles["ICEA_H2"]))
-    for s in next_steps_section(req, packing, recommendation, lang=lang):
-        story.append(Paragraph(f"• {s}", styles["ICEA_Body"]))
-    story.append(Spacer(1, SECTION_SPACER))
-
-    # Risks & mitigations
-    risks_mitigations = risks_mitigations_section(risk_notes, lang=lang)
-    if risks_mitigations:
-        story.append(Paragraph(L["risks_mitigations"], styles["ICEA_H2"]))
-        rm_data = [[L["risk"], L["mitigation"]]]
-        for rm in risks_mitigations:
-            rm_data.append([rm["risk"], rm["mitigation"]])
-        story.append(_table_with_header(rm_data, [2.5 * inch, 3 * inch]))
-        story.append(Spacer(1, SECTION_SPACER))
-
-    # Methodology
-    story.append(Paragraph(L["methodology"], styles["ICEA_H2"]))
-    story.append(Paragraph(L["how_calculated"], styles["ICEA_Small"]))
-    for m in methodology_section(lang=lang):
-        story.append(Paragraph(f"<b>{m['title']}</b>", styles["ICEA_Body"]))
-        story.append(Paragraph(m["body"], styles["ICEA_Body"]))
-        story.append(Spacer(1, 0.08 * inch))
-    story.append(Spacer(1, SECTION_SPACER))
-
-    # Sensitivity
     sens = sensitivity_section(req, cost, recommendation)
     story.append(Paragraph(L["sensitivity"], styles["ICEA_H2"]))
     story.append(Paragraph(L["sensitivity_intro"], styles["ICEA_Small"]))
@@ -538,10 +524,39 @@ def generate_report_pdf(
         sens_items.append(f"{L['if_nodes_minus'].format(sens['node_count'] - 1)}: ≈ ${sens['if_nodes_minus_one_monthly_usd']:,.2f}/month")
     sens_items.append(f"{L['if_runtime_20']}: ≈ ${sens['if_runtime_plus_20_pct_monthly_usd']:,.2f}/month")
     for item in sens_items:
-        story.append(Paragraph(f"• {item}", styles["ICEA_Body"]))
+        story.append(Paragraph("• " + _escape_para(item), styles["ICEA_Body"]))
     story.append(Spacer(1, SECTION_SPACER))
 
-    # Data quality
+    # ----- Part 4: Recommendations & actions -----
+    story.append(Paragraph(L["engineering_notes"], styles["ICEA_H2"]))
+    notes = engineering_notes(packing, recommendation, risk_notes, lang=lang)
+    for n in notes:
+        story.append(Paragraph("• " + _escape_para(n), styles["ICEA_Body"]))
+    story.append(Spacer(1, SECTION_SPACER))
+
+    story.append(Paragraph(L["next_steps"], styles["ICEA_H2"]))
+    for s in next_steps_section(req, packing, recommendation, lang=lang):
+        story.append(Paragraph("• " + _escape_para(s), styles["ICEA_Body"]))
+    story.append(Spacer(1, SECTION_SPACER))
+
+    risks_mitigations = risks_mitigations_section(risk_notes, lang=lang)
+    if risks_mitigations:
+        story.append(Paragraph(L["risks_mitigations"], styles["ICEA_H2"]))
+        rm_data = [[L["risk"], L["mitigation"]]]
+        for rm in risks_mitigations:
+            rm_data.append([rm["risk"], rm["mitigation"]])
+        story.append(_table_with_header(rm_data, [2.5 * inch, 3 * inch]))
+        story.append(Spacer(1, SECTION_SPACER))
+
+    # ----- Part 5: Reference (methodology, data quality, CTA, glossary) -----
+    story.append(Paragraph(L["methodology"], styles["ICEA_H2"]))
+    story.append(Paragraph(L["how_calculated"], styles["ICEA_Small"]))
+    for m in methodology_section(lang=lang):
+        story.append(Paragraph(f"<b>{_escape_para(m['title'])}</b>", styles["ICEA_Body"]))
+        story.append(Paragraph(_escape_para(m["body"]), styles["ICEA_Body"]))
+        story.append(Spacer(1, 0.08 * inch))
+    story.append(Spacer(1, SECTION_SPACER))
+
     dq = data_quality_note(req, lang=lang)
     story.append(Paragraph(L["data_quality"], styles["ICEA_H2"]))
     if dq["optional_inputs_used"]:
@@ -550,26 +565,23 @@ def generate_report_pdf(
         dq_text = L["no_optional"]
     if dq["suggest_peak_executor_memory"]:
         dq_text += L["suggest_peak"]
-    story.append(Paragraph(dq_text, styles["ICEA_Small"]))
+    story.append(Paragraph(_escape_para(dq_text), styles["ICEA_Small"]))
     story.append(Spacer(1, SECTION_SPACER))
 
-    # Tier CTA and Re-run CTA
     story.append(Paragraph(L["further_analysis"], styles["ICEA_H2"]))
-    story.append(Paragraph(tier_cta_section(lang=lang), styles["ICEA_Body"]))
-    story.append(Paragraph(rerun_cta(app_url, lang=lang), styles["ICEA_Body"]))
+    story.append(Paragraph(_escape_para(tier_cta_section(lang=lang)), styles["ICEA_Body"]))
+    story.append(Paragraph(_escape_para(rerun_cta(app_url or "", lang=lang)), styles["ICEA_Body"]))
     story.append(Spacer(1, SECTION_SPACER))
 
-    # Understanding this report (explanations)
     story.append(Paragraph(L["understanding"], styles["ICEA_H2"]))
     story.append(Paragraph(L["understanding_intro"], styles["ICEA_Small"]))
     story.append(Spacer(1, 0.15 * inch))
     for e in explanations_section(lang=lang):
-        story.append(Paragraph(f"<b>{e['title']}</b>", styles["ICEA_Body"]))
-        story.append(Paragraph(e["body"], styles["ICEA_Body"]))
+        story.append(Paragraph("<b>" + _escape_para(e["title"]) + "</b>", styles["ICEA_Body"]))
+        story.append(Paragraph(_escape_para(e["body"]), styles["ICEA_Body"]))
         story.append(Spacer(1, 0.1 * inch))
     story.append(Spacer(1, SECTION_SPACER))
 
-    # Definitions (glossary)
     story.append(Paragraph(L["definitions"], styles["ICEA_H2"]))
     story.append(Paragraph(L["definitions_intro"], styles["ICEA_Small"]))
     story.append(Spacer(1, 0.12 * inch))

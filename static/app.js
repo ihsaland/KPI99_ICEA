@@ -358,7 +358,7 @@
       });
   });
 
-  // Tier 1: use checkout flow (promo code + Stripe or free redirect). Path 1 = form payload; Path 2 = event log result.
+  // Tier 1: use checkout flow (voucher code + Stripe or free redirect). Path 1 = form payload; Path 2 = event log result.
   document.querySelectorAll(".btn-tier[data-tier='1']").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var isPath2 = btn.getAttribute("data-path") === "2";
