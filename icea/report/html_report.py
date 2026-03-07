@@ -6,6 +6,7 @@ from icea.report.templates import (
     executive_summary,
     executive_summary_narrative,
     executive_key_takeaway,
+    event_log_summary,
     methodology_citation,
     benchmark_compare_note,
     explanations_section,
@@ -105,6 +106,13 @@ _SECTIONS = {
         "definition": "Definition",
         "download_pdf": "Download PDF",
         "report_version_footer": "ICEA report v{}. {}",
+        "event_log_section": "Observed from event log",
+        "event_log_intro": "The following cluster and workload metrics were derived from your Spark event log.",
+        "total_executors": "Total executors",
+        "peak_executor_memory_gb": "Peak executor memory (GB)",
+        "input_data_gb": "Avg input data per job (GB)",
+        "shuffle_read_mb": "Avg shuffle read (MB)",
+        "shuffle_write_mb": "Avg shuffle write (MB)",
     },
     "es": {
         "report_title": "Informe de Costos y Eficiencia de Infraestructura",
@@ -169,6 +177,13 @@ _SECTIONS = {
         "definition": "Definición",
         "download_pdf": "Descargar PDF",
         "report_version_footer": "Informe ICEA v{}. {}",
+        "event_log_section": "Observado desde el registro de eventos",
+        "event_log_intro": "Las siguientes métricas de clúster y carga se derivaron de su registro de eventos Spark.",
+        "total_executors": "Total de ejecutores",
+        "peak_executor_memory_gb": "Memoria pico del ejecutor (GB)",
+        "input_data_gb": "Datos de entrada promedio por trabajo (GB)",
+        "shuffle_read_mb": "Shuffle de lectura promedio (MB)",
+        "shuffle_write_mb": "Shuffle de escritura promedio (MB)",
     },
 }
 
@@ -272,6 +287,19 @@ def generate_report_html(
         scenario_rows.append(f"<tr><td>{L['if_nodes_minus'].format(sensitivity['node_count'] - 1)}</td><td>${sensitivity['if_nodes_minus_one_monthly_usd']:,.2f}</td></tr>")
     scenario_rows.append(f"<tr><td>{L['if_runtime_20']}</td><td>${sensitivity['if_runtime_plus_20_pct_monthly_usd']:,.2f}</td></tr>")
     scenario_table = f"<table><tbody><tr><th>{L['scenario']}</th><th>{L['monthly_cost_usd']}</th></tr>" + "".join(scenario_rows) + "</tbody></table>"
+    els = event_log_summary(req, packing)
+    if els:
+        el_rows = []
+        for key in ["total_executors", "executor_cores", "executor_memory_gb", "peak_executor_memory_gb", "input_data_gb", "shuffle_read_mb", "shuffle_write_mb"]:
+            if key not in els:
+                continue
+            v = els[key]
+            label = L.get(key, key.replace("_", " ").title())
+            disp = f"{v:,.2f}" if isinstance(v, float) else str(v)
+            el_rows.append(f"<tr><td>{label}</td><td>{disp}</td></tr>")
+        event_log_html = f'<h2>{L["event_log_section"]}</h2><p class="section-intro">{L["event_log_intro"]}</p><table><tbody><tr><th>{L["input"]}</th><th>{L["value"]}</th></tr>' + "".join(el_rows) + "</tbody></table>"
+    else:
+        event_log_html = ""
     methodology_intro = methodology_citation(lang=lang)
     summary_text = (
         f"{L['summary_score']}: <strong>{ex['efficiency_score']}/100</strong>. "
@@ -427,6 +455,7 @@ def generate_report_html(
 <p class="subtitle">{L["estimates_note"]}</p>
 <h2>{L["scenario_summary"]}</h2>
 {scenario_table}
+{event_log_html}
 {forecast_html}
 <h2>{L["engineering_notes"]}</h2>
 <ul>

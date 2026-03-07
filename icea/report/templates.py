@@ -452,6 +452,41 @@ def data_quality_note(req: AnalyzeRequest, *, lang: str = "en") -> dict:
     }
 
 
+def event_log_summary(
+    req: AnalyzeRequest,
+    packing: PackingResult,
+) -> dict | None:
+    """
+    When analysis was derived from an event log, return a dict of metric key -> value
+    for the "Observed from event log" section. Returns None when no event-log-derived
+    workload fields are present.
+    """
+    w = req.workload
+    has_workload_from_log = (
+        getattr(w, "peak_executor_memory_gb", None) is not None
+        or getattr(w, "input_data_gb", None) is not None
+        or getattr(w, "shuffle_read_mb", None) is not None
+        or getattr(w, "shuffle_write_mb", None) is not None
+    )
+    if not has_workload_from_log:
+        return None
+    total_executors = req.node.count * packing.executors_per_node
+    out: dict = {
+        "total_executors": total_executors,
+        "executor_cores": req.executor.cores,
+        "executor_memory_gb": req.executor.memory_gb,
+    }
+    if getattr(w, "peak_executor_memory_gb", None) is not None:
+        out["peak_executor_memory_gb"] = w.peak_executor_memory_gb
+    if getattr(w, "input_data_gb", None) is not None:
+        out["input_data_gb"] = w.input_data_gb
+    if getattr(w, "shuffle_read_mb", None) is not None:
+        out["shuffle_read_mb"] = w.shuffle_read_mb
+    if getattr(w, "shuffle_write_mb", None) is not None:
+        out["shuffle_write_mb"] = w.shuffle_write_mb
+    return out
+
+
 def tier_cta_section(*, lang: str = "en") -> str:
     """One line CTA for Tier 2/3."""
     return _t(lang,

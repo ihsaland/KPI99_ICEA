@@ -19,6 +19,7 @@ from icea.report.templates import (
     executive_summary,
     executive_summary_narrative,
     executive_key_takeaway,
+    event_log_summary,
     methodology_citation,
     benchmark_compare_note,
     explanations_section,
@@ -233,6 +234,13 @@ def _pdf_labels(lang: str) -> dict:
             "definitions_intro": "Términos clave usados en este informe.",
             "term": "Término",
             "definition": "Definición",
+            "event_log_section": "Observado desde el registro de eventos",
+            "event_log_intro": "Las siguientes métricas de clúster y carga se derivaron de su registro de eventos Spark.",
+            "total_executors": "Total de ejecutores",
+            "peak_executor_memory_gb": "Memoria pico del ejecutor (GB)",
+            "input_data_gb": "Datos de entrada promedio por trabajo (GB)",
+            "shuffle_read_mb": "Shuffle de lectura promedio (MB)",
+            "shuffle_write_mb": "Shuffle de escritura promedio (MB)",
         }
     return {
         "report_title": "Infrastructure Cost & Efficiency Report",
@@ -292,13 +300,21 @@ def _pdf_labels(lang: str) -> dict:
         "definitions_intro": "Key terms used in this report.",
         "term": "Term",
         "definition": "Definition",
+        "event_log_section": "Observed from event log",
+        "event_log_intro": "The following cluster and workload metrics were derived from your Spark event log.",
+        "total_executors": "Total executors",
+        "peak_executor_memory_gb": "Peak executor memory (GB)",
+        "input_data_gb": "Avg input data per job (GB)",
+        "shuffle_read_mb": "Avg shuffle read (MB)",
+        "shuffle_write_mb": "Avg shuffle write (MB)",
     }
 
 
-def _make_footer(static_dir=None, lang: str = "en"):
-    """Return a footer callback that can use static_dir for favicon."""
+def _make_footer(static_dir=None, lang: str = "en", doc_name_short_override: str | None = None):
+    """Return a footer callback that can use static_dir for favicon. doc_name_short_override for job report etc."""
     def _add_footer(canvas, doc):
         meta = report_metadata(lang=lang)
+        doc_short = doc_name_short_override if doc_name_short_override else meta["doc_name_short"]
         canvas.saveState()
         fav = get_favicon_path(static_dir)
         y_footer = MARGIN_BOTTOM - 0.25 * inch
@@ -310,7 +326,7 @@ def _make_footer(static_dir=None, lang: str = "en"):
         x_text = MARGIN_LR + (0.28 * inch if fav else 0)
         canvas.setFont("Helvetica", 8)
         canvas.setFillColor(colors.HexColor(COLOR_MUTED))
-        canvas.drawString(x_text, y_footer, f"ICEA report v{meta['report_version']} — {meta['doc_name_short']} — {meta['date']}")
+        canvas.drawString(x_text, y_footer, f"ICEA report v{meta['report_version']} — {doc_short} — {meta['date']}")
         canvas.drawString(x_text, y_footer - 0.14 * inch, meta["copyright"])
         canvas.drawRightString(letter[0] - MARGIN_LR, y_footer, f"Page {doc.page}")
         canvas.restoreState()
@@ -494,6 +510,24 @@ def generate_report_pdf(
     story.append(Paragraph(L["scenario_summary"], styles["ICEA_H2"]))
     story.append(_table_with_header(scenario_data, [3 * inch, 1.8 * inch]))
     story.append(Spacer(1, SECTION_SPACER))
+
+    # Event log summary (when analysis was derived from event log)
+    els = event_log_summary(req, packing)
+    if els:
+        story.append(Paragraph(L["event_log_section"], styles["ICEA_H2"]))
+        story.append(Paragraph(_escape_para(L["event_log_intro"]), styles["ICEA_Small"]))
+        el_data = [[L["input"], L["value"]]]
+        for key in ["total_executors", "executor_cores", "executor_memory_gb", "peak_executor_memory_gb", "input_data_gb", "shuffle_read_mb", "shuffle_write_mb"]:
+            if key not in els:
+                continue
+            v = els[key]
+            label = L.get(key, key.replace("_", " ").title())
+            if isinstance(v, float):
+                el_data.append([label, f"{v:,.2f}"])
+            else:
+                el_data.append([label, str(v)])
+        story.append(_table_with_header(el_data, [2.5 * inch, 2.5 * inch]))
+        story.append(Spacer(1, SECTION_SPACER))
 
     # ----- Part 3: Analysis detail (utilization, assumptions, forecast, sensitivity) -----
     story.append(Paragraph(L["resource_util"], styles["ICEA_H2"]))
